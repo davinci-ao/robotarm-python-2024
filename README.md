@@ -80,7 +80,7 @@ robotArm.wait()
 ```
 Verplaats alle blokken één plek naar rechts. Zorg ervoor dat de volgorde van de blokken gelijk blijft. 
 
-![Oefening 5](readme/exercise6.png)
+![Oefening 6](readme/exercise6.png)
 
 ## Oefening 7
 ```python
@@ -98,7 +98,7 @@ Verplaats iedere stapel één plek naar links.
 
 Je mag maximaal 11 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
 
-![Oefening 6](readme/exercise7.png)
+![Oefening 7](readme/exercise7.png)
 
 ## Oefening 8
 ```python
@@ -116,7 +116,7 @@ Verplaats de stapel naar de rechterkant.
 
 Je mag maximaal 11 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
 
-![Oefening 7](readme/exercise8.png)
+![Oefening 8](readme/exercise8.png)
 
 ## Oefening 9
 ```python
@@ -134,7 +134,7 @@ Verplaats alle stapels vijf stappen naar rechts.
 
 Je mag maximaal 12 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
 
-![Oefening 8](readme/exercise9.png)
+![Oefening 9](readme/exercise9.png)
 
 ## Oefening 10
 ```python
@@ -152,7 +152,7 @@ Draai de volgorde van de blokken om.
 
 Je mag maximaal 15 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
 
-![Oefening 9](readme/exercise10.png)
+![Oefening 10](readme/exercise10.png)
 
 ## Oefening 11
 ```python
@@ -170,7 +170,7 @@ Verplaats alle witte blokken één plek naar rechts.
 
 Let op, de blokken zijn iedere keer anders als je het programma start!
 
-![Oefening 10](readme/exercise11.png)
+![Oefening 11](readme/exercise11.png)
 
 ## Oefening 12
 ```python
@@ -188,7 +188,7 @@ Verplaats alle rode blokken naar het einde.
 
 Let op, de blokken zijn iedere keer anders als je het programma start!
 
-![Oefening 11](readme/exercise12.png)
+![Oefening 12](readme/exercise12.png)
 
 ## Oefening 13
 ```python
@@ -204,6 +204,11 @@ robotArm.randomLevel(1,7)
 robotArm.wait()
 ```
 Verdeel alle blokken over de lege plaatsen, zodra er geen blokken meer zijn moet de arm stoppen.
+![Oefening 12](readme/exercise13-start.png)
+
+resultaat na verdeling ziet er zo uit:
+
+![Oefening 12](readme/exercise13-end.png)
 
 [Bonus opdrachten](https://www.dropbox.com/s/7q4o3xboi5whgop/RobotArm%20Puzzels.docx?dl=0)
 
