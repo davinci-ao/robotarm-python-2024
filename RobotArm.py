@@ -38,6 +38,9 @@ import random
 #       operator is an optional function with a parameter: events {list of events}
 #       the operator must/can handle each event in events
 #
+#   operate()
+#       make the robotarm operate on keyboard-keys: LEFT, RIGHT and DOWN
+#
 # ######## creating and loading levels ########
 #   
 #   loadLevel(levelName)
@@ -399,4 +402,18 @@ class RobotArm:
         pygame.time.delay(self._eventSleepTime) # go asleep for 300 milliseconds, give the processor some rest
         cycle = 0                               # wake up for events during sleep
 
+  def _operator(self, instructions):
+    for instruction in instructions:
+      if instruction.type == pygame.KEYDOWN:
+          if instruction.key == pygame.K_LEFT:
+            self.moveLeft()
+          if instruction.key == pygame.K_RIGHT:
+            self.moveRight()
+          if instruction.key == pygame.K_DOWN:
+            if self.scan() == '':
+              self.grab()
+            else:
+              self.drop()
 
+  def operate(self):
+    self.wait(self._operator)

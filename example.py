@@ -9,4 +9,4 @@ robotArm = RobotArm('exercise 1')
 
 
 # Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
+robotArm.operate()
