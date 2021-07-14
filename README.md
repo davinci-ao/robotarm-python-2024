@@ -195,7 +195,7 @@ Let op, de blokken zijn iedere keer anders als je het programma start!
 from RobotArm import RobotArm
 # Let op: hier start het anders voor een random level:
 robotArm = RobotArm()
-robotArm.randomLevel(1,8)
+robotArm.randomLevel(1,7)
 
 # Jouw python instructies zet je vanaf hier:
 
