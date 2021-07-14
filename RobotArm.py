@@ -101,15 +101,15 @@ class RobotArm:
   _backgroundColor = (200,200,200)
   _penColor = (0,0,0)
   _maxStacks = 10
-  _maxLayers = 6
-  _boxHeight = 49
-  _boxWidth = 49
+  _maxLayers = 7
+  _boxHeight = 29
+  _boxWidth = 29
   _penWidth = 1
   _boxMargin = 2
-  _armTopHeight = 25
+  _armTopHeight = 15
   _bottomMargin = 2
   _idleAnimationTime = 300
-  _screenMargin = 2
+  _screenMargin = 3
   _eventSleepTime = 300
   _eventActiveCycles = 100
   _iconImage = 'robotarm.ico'
@@ -127,7 +127,7 @@ class RobotArm:
     self._clock = pygame.time.Clock()
     
     self._screenWidth = self._stackX(self._maxStacks) + self._screenMargin
-    self._screenHeight = self._layerY(-1) + self._bottomMargin + self._screenMargin
+    self._screenHeight = self._layerY(-1) + self._bottomMargin + 2 * self._screenMargin
     self._screen = pygame.display.set_mode((self._screenWidth, self._screenHeight))
 
     try:
@@ -163,16 +163,16 @@ class RobotArm:
     pygame.draw.rect(self._screen, self._penColor, (x, y, self._boxWidth, self._boxHeight), self._penWidth)
 
   def _boxSpaceWidth(self):
-    return (self._penWidth + self._boxWidth + 2 * self._boxMargin) 
+    return (self._boxWidth + 2 * self._boxMargin) + self._penWidth
 
   def _stackX(self, stack):
-    return self._penWidth + self._boxMargin + stack * self._boxSpaceWidth()
+    return self._screenMargin + self._boxMargin + stack * self._boxSpaceWidth() + self._penWidth
 
   def _boxSpaceHeight(self):
     return (self._boxHeight - self._penWidth)
 
   def _layerY(self,layer):
-    return self._yardBottom - (layer + 1) * self._boxSpaceHeight() 
+    return self._yardBottom - (layer + 1) * self._boxSpaceHeight() - self._screenMargin
 
   def _drawBox(self, stack, layer):
     x = self._stackX(stack) 
@@ -183,15 +183,19 @@ class RobotArm:
   def _drawStack(self, stack):
     for l in range(len(self._yard[stack])):
       self._drawBox(stack,l)
-    x = self._stackX(stack) - self._boxMargin - 1 # - self._penWidth
+    x = self._stackX(stack) - self._boxMargin - self._penWidth
     y = self._layerY(-1) + self._bottomMargin
 
     pygame.draw.lines(self._screen, self._penColor, False, [(x, y - 5), (x, y), (x + self._boxSpaceWidth(), y), (x + self._boxSpaceWidth(), y - 5)])
 
   def _drawArm(self):
-    xm = self._armX + int((self._boxSpaceWidth() - self._penWidth)/2)
+    xm = self._armX + int(self._boxSpaceWidth()/2) - self._boxMargin
     pygame.draw.line(self._screen, self._penColor, (xm, 2), (xm, self._armHeight - 2))
-    pygame.draw.lines(self._screen, self._penColor, False, [(self._armX - self._penWidth, self._armHeight + 2), (self._armX - self._penWidth, self._armHeight - 2),(self._armX + self._boxWidth + self._penWidth, self._armHeight - 2),(self._armX + self._boxWidth + self._penWidth ,self._armHeight + 2)])
+    pygame.draw.lines(self._screen, self._penColor, False, [
+      (self._armX - self._boxMargin,                  self._armHeight + 2), 
+      (self._armX - self._boxMargin,                  self._armHeight - 2),
+      (self._armX + self._boxWidth + self._penWidth,  self._armHeight - 2),
+      (self._armX + self._boxWidth + self._penWidth , self._armHeight + 2)])
     if self._color > '':
       self._drawBoxAtPosition(self._armX,self._armHeight,self._getColorCode(self._color))
 
