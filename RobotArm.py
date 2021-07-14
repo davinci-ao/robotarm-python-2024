@@ -53,6 +53,9 @@ import random
 #       box colors example of a yard: [['red','green'],['red','blue'],[],['green']]
 #     returns True if succeeded, returns False if errors found, but sanitized
 #
+#   randomLevel(stacks, layers)
+#     loads a simple random level with stacks and layers
+#
 #   loadRandomLevel(requirements )
 #     loads a random level with optional requirements
 #       requirements dictionary can contain key-values:
@@ -87,8 +90,8 @@ class RobotArm:
     {'name': 'exercise 8', 'yard' : [[],["red","red","red","red","red","red","red"]]},
     {'name': 'exercise 9', 'yard' : [["blue"],["green", "green"],["white","white","white"],["red","red","red","red"]]},
     {'name': 'exercise 10', 'yard' : [["green"],["blue"],["white"],["red"],["blue"]]},
-    {'name': 'exercise 11', 'yard' : {'maxStacks': 10, 'minBoxes': 1, 'maxBoxes': 1, 'maxColors': 4, 'emptyStacks': [0]}},
-    {'name': 'exercise 12', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'maxColors': 4}},
+    {'name': 'exercise 11', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['white'], 'maxColors': 4}},
+    {'name': 'exercise 12', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red'], 'maxColors': 4}},
     {'name': 'exercise 13', 'yard' : [["green"],["green"],["green"],["blue"],["white"],["green"],["red"],["red"],["blue"],["green"]]},
     {'name': 'exercise 14', 'yard' : [[],["green"],["white"],["green","white"],["red","white"],["white","white"],["blue"],["blue","blue","blue"],["blue", "green", "green"],["red"]]},
     {'name': 'exercise 15', 'yard' : [[],["blue"],[],["blue"],["white"],[],["red"],["green"],["red"],["green"]]}
@@ -125,6 +128,10 @@ class RobotArm:
     self._screenWidth = self._stackX(self._maxStacks) + self._screenMargin
     self._screenHeight = self._layerY(-1) + self._bottomMargin + self._screenMargin
     self._screen = pygame.display.set_mode((self._screenWidth, self._screenHeight))
+
+    
+    programIcon = pygame.image.load('robotarm.ico')
+    pygame.display.set_icon(programIcon)
 
     # Load level at creation
     if levelName != '':
@@ -306,7 +313,6 @@ class RobotArm:
     return {'yard' : yard, 'success' : success}
 
   def loadMyLevel(self, yard, levelName = 'unknown level'):
-    print('my level '+levelName)
     result = self._checkYard(yard)
     self._yard = result['yard'] # sanitized yard
     success = result['success'] # where there errors?
@@ -330,48 +336,58 @@ class RobotArm:
     if not success:
       self.loadMyLevel([])
     return success
-        
-  def loadRandomLevel(self, requirements = {}):
-    random.seed()
-    myYard = []
-    maxStacks = 6
-    if 'maxStacks' in requirements:
-      maxStacks = requirements['maxStacks']
-    emptyStacks = []
-    if 'emptyStacks' in requirements:
-      emptyStacks = requirements['emptyStacks']
-    minBoxes = 1
-    if 'minBoxes' in requirements:
-      minBoxes = requirements['minBoxes']
-    maxBoxes = 3
-    if 'maxBoxes' in requirements:
-      maxBoxes = requirements['maxBoxes']
-    maxColors = 3
-    if 'maxColors' in requirements:
-      maxColors = requirements['maxColors']
-    requiredColors = ['blue']
-    if 'requiredColors' in requirements:
-      requiredColors = requirements['requiredColors']
-    levelName = 'random level' 
-    if 'levelName' in requirements:
-      levelName = requirements['levelName']
+
+  def _requiredColorsFound(self, yard, requiredColors):
     colors = []
-    for color in requiredColors:
-      colors.append(color)
-    while len(colors) < maxColors:
-      color = self._colors[random.randint(0,len(self._colors)-1)]['name']
-      if not color in colors:
+    for stack in yard:
+      for color in stack:
         colors.append(color)
-    for l in range(maxStacks):
-      random.seed()
-      stack = []
-      if emptyStacks.count(l) == 0:
+    for color in requiredColors:
+      if colors.count(color) == 0:
+        return False
+    return True
+
+  def _createRandomYard(self, maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors):
+    yard = []
+    while len(yard) == 0 or not self._requiredColorsFound(yard, requiredColors):
+      yard = []
+      for l in range(maxStacks):
+        random.seed()
+        stack = []
         height = random.randint(minBoxes, maxBoxes)
         for b in range(height):
           color = colors[random.randint(0,len(colors)-1)]
           stack.append(color)
-      myYard.append(stack)
+        yard.append(stack)
+    return yard 
+
+  def _randomColors(self, requiredColors, maxColors):
+    colors = []
+    for color in requiredColors:
+      if not color in colors:
+        colors.append(color)
+    while len(colors) < maxColors:
+      color = self._colors[random.randint(0,len(self._colors)-1)]['name']
+      if not color in colors:
+        colors.append(color)
+    return colors
+        
+  def loadRandomLevel(self, requirements = {}):
+    maxStacks = requirements['maxStacks'] if 'maxStacks' in requirements else 6
+    maxStacks = self._maxStacks if maxStacks > self._maxStacks else maxStacks
+    minBoxes = requirements['minBoxes'] if 'minBoxes' in requirements else 1
+    maxBoxes = requirements['maxBoxes'] if 'maxBoxes' in requirements else 3
+    maxBoxes = self._maxLayers if maxBoxes > self._maxLayers else maxBoxes
+    requiredColors = requirements['requiredColors'] if 'requiredColors' in requirements else []
+    levelName = requirements['levelName'] if 'levelName' in requirements else 'random level'
+    maxColors = requirements['maxColors'] if 'maxColors' in requirements else 4
+
+    colors = self._randomColors(requiredColors, maxColors)
+    myYard = self._createRandomYard(maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors)
     self.loadMyLevel(myYard, levelName)
+
+  def randomLevel(self, stacks, layers):
+    self.loadRandomLevel({'maxStacks': stacks, 'maxBoxes': layers})
 
   def inspectYard(self):
     print(self._yard)
