@@ -101,7 +101,7 @@ class RobotArm:
   _backgroundColor = (200,200,200)
   _penColor = (0,0,0)
   _maxStacks = 10
-  _maxLayers = 8
+  _maxLayers = 6
   _boxHeight = 49
   _boxWidth = 49
   _penWidth = 1
@@ -112,7 +112,7 @@ class RobotArm:
   _screenMargin = 2
   _eventSleepTime = 300
   _eventActiveCycles = 100
-  _iconImage = 'robotarm.icoq'
+  _iconImage = 'robotarm.ico'
 
   def __init__(self, levelName = ''):
     self._color = self.EMPTY

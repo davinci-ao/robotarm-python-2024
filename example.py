@@ -2,7 +2,7 @@ from RobotArm import RobotArm
 
 robotArm = RobotArm('exercise 1')
 
-# Jouw python instructies vanaf hier:
+# Jouw python instructies zet je vanaf hier:
 
 
 
