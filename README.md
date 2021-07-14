@@ -3,102 +3,96 @@
 Lees de instructies op de wiki pagina hoe de robotarm bibliotheek werkt. Vervolgens ga je proberen de onderstaande oefeningen te maken.
 
 ## Oefening 1
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 1");
+robotArm = RobotArm('exercise 1')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats het rode blok één plek naar links.
 
 ![Oefening 1](readme/exercise1.png)
 
 ## Oefening 2
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 2");
+robotArm = RobotArm('exercise 2')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Stappel alle blokken op aan de rechterkant.
 
 ![Oefening 2](readme/exercise2.png)
 
 ## Oefening 3
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 3");
+robotArm = RobotArm('exercise 3')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats de hele stapel blokken één plek naar rechts.
 
 ![Oefening 3](readme/exercise3.png)
 
 ## Oefening 4
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 4");
+robotArm = RobotArm('exercise 4')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats de hele stapel blokken één plek naar rechts. Zorg ervoor dat de volgorde van de blokken gelijk blijft.
 
 ![Oefening 4](readme/exercise4.png)
 
 ## Oefening 6
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 6");
+robotArm = RobotArm('exercise 6')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats alle blokken één plek naar rechts. Zorg ervoor dat de volgorde van de blokken gelijk blijft. 
 
 ![Oefening 5](readme/exercise6.png)
 
 ## Oefening 7
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 7");
+robotArm = RobotArm('exercise 7')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats iedere stapel één plek naar links.
 
@@ -107,17 +101,16 @@ Je mag maximaal 13 regels code gebruiken!
 ![Oefening 6](readme/exercise7.png)
 
 ## Oefening 8
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 8");
+robotArm = RobotArm('exercise 8')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats de stapel naar de rechterkant.
 
@@ -126,17 +119,16 @@ Je mag maximaal 13 regels code gebruiken!
 ![Oefening 7](readme/exercise8.png)
 
 ## Oefening 9
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 9");
+robotArm = RobotArm('exercise 9')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats alle stapels vijf stappen naar rechts.
 
@@ -145,17 +137,16 @@ Je mag maximaal 15 regels code gebruiken!
 ![Oefening 8](readme/exercise9.png)
 
 ## Oefening 10
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 10");
+robotArm = RobotArm('exercise 10')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Draai de volgorde van de blokken om.
 
@@ -164,17 +155,16 @@ Je mag maximaal 20 regels code gebruiken!
 ![Oefening 9](readme/exercise10.png)
 
 ## Oefening 11
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 11");
+robotArm = RobotArm('exercise 11')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats alle witte blokken één plek naar rechts. 
 
@@ -183,17 +173,16 @@ Let op, de blokken zijn iedere keer anders als je het programma start!
 ![Oefening 10](readme/exercise11.png)
 
 ## Oefening 12
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
 
-  robotArm.loadLevel("exercise 12");
+robotArm = RobotArm('exercise 12')
 
-  // Je eigen code plaats je hier.
+# Jouw python instructies zet je vanaf hier:
 
-  robotArm.run();
-</script>
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verplaats alle rode blokken naar het einde.
 
@@ -202,17 +191,17 @@ Let op, de blokken zijn iedere keer anders als je het programma start!
 ![Oefening 11](readme/exercise12.png)
 
 ## Oefening 13
-```javascript
-<script>
-  var canvas = document.getElementById("canvas");
-  var robotArm = new RobotArm(canvas);
+```python
+from RobotArm import RobotArm
+# Let op: hier start het anders voor een random level:
+robotArm = RobotArm()
+robotArm.randomLevel(1,8)
 
-  robotArm.randomLevel( 1, 8);
+# Jouw python instructies zet je vanaf hier:
 
-  // Je eigen code plaats je hier.
 
-  robotArm.run();
-</script>
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
 ```
 Verdeel alle blokken over de lege plaatsen, zodra er geen blokken meer zijn moet de arm stoppen.
 
