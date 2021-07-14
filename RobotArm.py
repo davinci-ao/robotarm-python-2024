@@ -68,7 +68,7 @@ import random
 #
 #   inspectYard()
 #     prints the yard data, for inspection during debugging
-##
+#
 # ###########################################################
 
 class RobotArm:
@@ -112,6 +112,7 @@ class RobotArm:
   _screenMargin = 2
   _eventSleepTime = 300
   _eventActiveCycles = 100
+  _iconImage = 'robotarm.icoq'
 
   def __init__(self, levelName = ''):
     self._color = self.EMPTY
@@ -129,9 +130,11 @@ class RobotArm:
     self._screenHeight = self._layerY(-1) + self._bottomMargin + self._screenMargin
     self._screen = pygame.display.set_mode((self._screenWidth, self._screenHeight))
 
-    
-    programIcon = pygame.image.load('robotarm.ico')
-    pygame.display.set_icon(programIcon)
+    try:
+      programIcon = pygame.image.load(self._iconImage)
+      pygame.display.set_icon(programIcon)
+    except:
+      print(self._iconImage + ' not found')
 
     # Load level at creation
     if levelName != '':
