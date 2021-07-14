@@ -2,11 +2,11 @@ from RobotArm import RobotArm
 
 robotArm = RobotArm('exercise 1')
 
-# Jouw code vanaf hier:
+# Jouw python instructies vanaf hier:
 
 
 
 
 
 # Na jouw code wachten tot het sluiten van de window:
-robotArm.operate()
+robotArm.wait()
