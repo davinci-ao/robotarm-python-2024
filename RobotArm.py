@@ -1,4 +1,5 @@
 import pygame # install in terminal with: pip install pygame
+from SpriteSheet import SpriteSheet
 import sys
 import random
 
@@ -113,6 +114,8 @@ class RobotArm:
   _eventSleepTime = 300
   _eventActiveCycles = 100
   _iconImage = 'robotarm.ico'
+  _hazardSprite = 'caution-icon-hi.png'
+  _hazardFont = 'FreeSansBold.ttf'
 
   def __init__(self, levelName = ''):
     self._color = self.EMPTY
@@ -122,6 +125,7 @@ class RobotArm:
     self._armX = 0
     self.speed = 1
     self._yard = []
+
 
     pygame.init()
     self._clock = pygame.time.Clock()
@@ -133,8 +137,22 @@ class RobotArm:
     try:
       programIcon = pygame.image.load(self._iconImage)
       pygame.display.set_icon(programIcon)
+      self._testImage = programIcon
     except:
-      print(self._iconImage + ' not found')
+      print(f' ********* icon image: {self._iconImage} not found *********')
+
+    try:
+      ss = SpriteSheet(self._hazardSprite)
+      self._hazardSign = ss.load_strip((0,0,64,64), 4, self._backgroundColor)
+    except:
+      print(f' ********* hazard sprite: {self._hazardSprite} not found *********')
+      exit()
+
+    try:
+      self._font = pygame.font.Font(self._hazardFont, 24)
+    except:
+      print(f' ********* font: {self._hazardFont} not found *********')
+      exit()
 
     # Load level at creation
     if levelName != '':
@@ -206,6 +224,23 @@ class RobotArm:
       self._drawStack(c)
     self._drawArm()
 
+  def _animateHazard(self, message = 'problem!'):
+    xm = self._armX + int(self._boxSpaceWidth()/2) - self._boxMargin - 31
+    ym = 0
+
+    text = self._font.render(message, True, (200,50,50), self._backgroundColor)
+    for l in range(12):
+      i = l % 4
+      self._drawState()
+      self._screen.blit(self._hazardSign[i],(xm,ym))
+      if l%2 == 0 or l >= 6:
+        self._screen.blit(text, ((self._screenWidth//2) - text.get_rect().width//2,60))
+      pygame.display.update()
+      pygame.time.delay(100)
+      
+    self._drawState()
+    pygame.display.update()
+
   def _animate(self, *args):
     self._checkSpeed()
     self._armX = self._stackX(self._stack)
@@ -260,13 +295,14 @@ class RobotArm:
         pygame.time.delay(self._idleAnimationTime)
   
   ########### ROBOTARM MANIPULATION ###########
-  
   def moveRight(self):
     success = False
     if self._stack < self._maxStacks - 1:
       self._animate('right')
       self._stack += 1
       success = True
+    else:
+      self._animateHazard('hit right border!')   
     return success
 
   def moveLeft(self):
@@ -275,6 +311,8 @@ class RobotArm:
       self._animate('left')
       self._stack -= 1
       success = True
+    else:
+      self._animateHazard('hit left border!')
     return success
 
   def grab(self):
@@ -285,7 +323,11 @@ class RobotArm:
         self._color = self._yard[self._stack][-1]
         self._yard[self._stack].pop(-1)
         success = True
+      else:
+        self._animateHazard('nothing to grab!')
       self._animate('up')
+    else:
+      self._animateHazard('robot arm occupied!')
     return success
 
   def drop(self):
@@ -297,6 +339,10 @@ class RobotArm:
         self._color = self.EMPTY
         self._animate('up')
         success = True
+      else:
+        self._animateHazard('stack full!')
+    else:
+      self._animateHazard('no box to drop!')
     return success
   
   def scan(self):
