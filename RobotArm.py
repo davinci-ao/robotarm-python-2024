@@ -116,6 +116,16 @@ class RobotArm:
   _iconImage = 'robotarm.ico'
   _hazardSprite = 'caution-icon-hi.png'
   _hazardFont = 'FreeSansBold.ttf'
+  _previousAction = ''
+  _actionFlaws = [
+    ['left','right'],
+    ['right','left'],
+    ['drop','grap'],
+    ['grab','drop'],
+    ['scan','scan'],
+    ['drop','scan'],
+  ]
+  reportFlaws = False
 
   def __init__(self, levelName = ''):
     self._color = self.EMPTY
@@ -224,15 +234,14 @@ class RobotArm:
       self._drawStack(c)
     self._drawArm()
 
-  def _animateHazard(self, message = 'problem!'):
+  def _message(self, message = 'problem!', gravity = 1):
     xm = self._armX + int(self._boxSpaceWidth()/2) - self._boxMargin - 31
     ym = 0
 
     text = self._font.render(message, True, (200,50,50), self._backgroundColor)
     for l in range(12):
-      i = l % 4
       self._drawState()
-      self._screen.blit(self._hazardSign[i],(xm,ym))
+      if gravity == 1: self._screen.blit(self._hazardSign[l % 4],(xm,ym))
       if l%2 == 0 or l >= 6:
         self._screen.blit(text, ((self._screenWidth//2) - text.get_rect().width//2,60))
       pygame.display.update()
@@ -240,6 +249,12 @@ class RobotArm:
       
     self._drawState()
     pygame.display.update()
+
+  def _animateHazard(self, message = 'problem!'):
+    self._message(message, 1)
+
+  def _animateFlaw(self, message = 'inefficiency!'):
+    self._message(message, 0)
 
   def _animate(self, *args):
     self._checkSpeed()
@@ -293,19 +308,31 @@ class RobotArm:
           self._armX = targetX
       elif (args[0] == 'idle'):
         pygame.time.delay(self._idleAnimationTime)
+
+  def _efficiencyCheck(self, action):
+    for flaw in self._actionFlaws:
+      # print(f'checking flaws for {self._previousAction} and {action}')
+      # print(f'against flaws for {flaw[0]} and {flaw[1]}')
+      if (self._previousAction == flaw[0] and action == flaw[1]):
+        flawText = f'{flaw[1]} after {flaw[0]}? why?'
+        print(f'action flaw: {flawText}' )
+        if self.reportFlaws: self._animateFlaw(flawText)
+    self._previousAction = action
   
   ########### ROBOTARM MANIPULATION ###########
   def moveRight(self):
+    self._efficiencyCheck('right')
     success = False
     if self._stack < self._maxStacks - 1:
       self._animate('right')
       self._stack += 1
       success = True
     else:
-      self._animateHazard('hit right border!')   
+      self._animateHazard('hit right border!')
     return success
 
   def moveLeft(self):
+    self._efficiencyCheck('left')
     success = False
     if self._stack > 0:
       self._animate('left')
@@ -316,6 +343,7 @@ class RobotArm:
     return success
 
   def grab(self):
+    self._efficiencyCheck('grab')
     success = False
     if self._color == self.EMPTY:
       self._animate('down')
@@ -331,6 +359,7 @@ class RobotArm:
     return success
 
   def drop(self):
+    self._efficiencyCheck('drop')
     success = False
     if self._color != self.EMPTY:
       if len(self._yard[self._stack]) < self._maxLayers:
@@ -346,6 +375,7 @@ class RobotArm:
     return success
   
   def scan(self):
+    self._efficiencyCheck('scan')
     return self._color
 
 ########### LEVEL & YARD lOADING & CREATION ###########
