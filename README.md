@@ -66,6 +66,22 @@ Verplaats de hele stapel blokken één plek naar rechts. Zorg ervoor dat de volg
 
 ![Oefening 4](readme/exercise4.png)
 
+## Oefening 5
+```python
+from RobotArm import RobotArm
+
+robotArm = RobotArm('exercise 5')
+
+# Jouw python instructies zet je vanaf hier:
+
+
+# Na jouw code wachten tot het sluiten van de window:
+robotArm.wait()
+```
+Verplaats alle blokken één plek naar rechts. Zorg ervoor dat de volgorde van de blokken gelijk blijft. 
+
+![Oefening 5](readme/exercise5.png)
+
 ## Oefening 6
 ```python
 from RobotArm import RobotArm
@@ -78,7 +94,7 @@ robotArm = RobotArm('exercise 6')
 # Na jouw code wachten tot het sluiten van de window:
 robotArm.wait()
 ```
-Verplaats alle blokken één plek naar rechts. Zorg ervoor dat de volgorde van de blokken gelijk blijft. 
+Verdeel de rode en witte blokken over 2 stapels: een rode stapel en een witte stapel. 
 
 ![Oefening 6](readme/exercise6.png)
 
