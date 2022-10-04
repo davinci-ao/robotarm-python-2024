@@ -85,8 +85,9 @@ class RobotArm:
     {'name': 'exercise 2', 'yard' : [["blue"],[],[],[],["blue"],[],[],["blue"]]},
     {'name': 'exercise 3', 'yard' : [["white","white","white","white"]]},
     {'name': 'exercise 4', 'yard' : [["blue","white", "green","red","white"]]},
-    {'name': 'exercise 5', 'yard' : [[],["red","red","red","red","red","red","red"]]},
-    {'name': 'exercise 6', 'yard' : [["red"],["blue"],["white"],["green"],["green"],["blue"],["red"],["white"]]},
+    {'name': 'exercise 6', 'yard' : [[],["red","white","red","white","red","white"]]},
+    {'name': 'exercise 5', 'yard' : [["red"],["blue"],["white"],["green"],["green"],["blue"],["red"],["white"]]},
+
     {'name': 'exercise 7', 'yard' : [[],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"],[],["blue","blue","blue","blue","blue","blue"]]},
     {'name': 'exercise 8', 'yard' : [[],["red","red","red","red","red","red","red"]]},
     {'name': 'exercise 9', 'yard' : [["blue"],["green", "green"],["white","white","white"],["red","red","red","red"]]},
