@@ -84,7 +84,7 @@ class RobotArm:
     {'name': 'exercise 1', 'yard' : [[],["red"]]},
     {'name': 'exercise 2', 'yard' : [["blue"],[],[],[],["blue"],[],[],["blue"]]},
     {'name': 'exercise 3', 'yard' : [["white","white","white","white"]]},
-    {'name': 'exercise 4', 'yard' : [["blue","white", "green"]]},
+    {'name': 'exercise 4', 'yard' : [["blue","white", "green","red","white"]]},
     {'name': 'exercise 5', 'yard' : [[],["red","red","red","red","red","red","red"]]},
     {'name': 'exercise 6', 'yard' : [["red"],["blue"],["white"],["green"],["green"],["blue"],["red"],["white"]]},
     {'name': 'exercise 7', 'yard' : [[],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"],[],["blue","blue","blue","blue","blue","blue"]]},
