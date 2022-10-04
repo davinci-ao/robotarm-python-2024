@@ -30,7 +30,7 @@ robotArm = RobotArm('exercise 2')
 # Na jouw code wachten tot het sluiten van de window:
 robotArm.wait()
 ```
-Stappel alle blokken op aan de rechterkant.
+Stapel alle blokken op aan de rechterkant.
 
 ![Oefening 2](readme/exercise2.png)
 
