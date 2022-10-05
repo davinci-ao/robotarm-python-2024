@@ -247,7 +247,7 @@ naar:
 Tel alle kleuren. Maak een stapel van de meestgetelde kleur. Gebruik level: democratie
 ![Democratie](readme/democratie-1.png)
 
-naar één stapel:
+meest getelde kleur naar één stapel:
 
 ![Democratie](readme/democratie-2.png)
 
