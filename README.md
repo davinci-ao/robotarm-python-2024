@@ -30,7 +30,7 @@ robotArm = RobotArm('exercise 2')
 # Na jouw code wachten tot het sluiten van de window:
 robotArm.wait()
 ```
-Stapel alle blokken op aan de rechterkant.
+Stappel alle blokken op aan de rechterkant.
 
 ![Oefening 2](readme/exercise2.png)
 
@@ -226,6 +226,46 @@ resultaat na verdeling ziet er zo uit:
 
 ![Oefening 12](readme/exercise13-end.png)
 
-[Bonus opdrachten](https://www.dropbox.com/s/7q4o3xboi5whgop/RobotArm%20Puzzels.docx?dl=0)
+## Bonusopdrachten
+### Spreiding
+Verspreid de blokken van de stapel. Gebruik level: exercise 3.
+![Spreiding](readme/spreiding-1.png)
 
-Succes!
+naar:
+
+![Spreiding](readme/spreiding-2.png)
+
+### Soorten
+Verzamel de kleuren in stapels. Gebruiken level: soorten
+![Soorten](readme/soorten-1.png)
+
+naar:
+
+![Soorten](readme/soorten-2.png)
+
+### Democratie
+Tel alle kleuren. Maak een stapel van de meestgetelde kleur. Gebruik level: democratie
+![Democratie](readme/democratie-1.png)
+
+naar één stapel:
+
+![Democratie](readme/democratie-2.png)
+
+Zijn er meerdere kleuren het meest geteld, kies dan zelf welke kleur je opstapelt:
+
+![Democratie](readme/democratie-3.png)
+
+naar:
+
+![Democratie](readme/democratie-4.png)
+
+Veel puzzelplezier en succes!
+
+### Kantelen
+Kantel de kleuren in de stapels. Gebruik level: exercise 9.
+
+![Kantelen](readme/kantelen-1.png)
+
+naar:
+
+![Kantelen](readme/kantelen-2.png)

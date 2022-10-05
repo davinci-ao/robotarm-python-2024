@@ -96,7 +96,9 @@ class RobotArm:
     {'name': 'exercise 12', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red'], 'maxColors': 4}},
     {'name': 'exercise 13', 'yard' : [["green"],["green"],["green"],["blue"],["white"],["green"],["red"],["red"],["blue"],["green"]]},
     {'name': 'exercise 14', 'yard' : [[],["green"],["white"],["green","white"],["red","white"],["white","white"],["blue"],["blue","blue","blue"],["blue", "green", "green"],["red"]]},
-    {'name': 'exercise 15', 'yard' : [[],["blue"],[],["blue"],["white"],[],["red"],["green"],["red"],["green"]]}
+    {'name': 'exercise 15', 'yard' : [[],["blue"],[],["blue"],["white"],[],["red"],["green"],["red"],["green"]]},
+    {'name': 'soorten', 'yard' : {'maxStacks': 6, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red','green','blue'], 'maxColors': 3, 'endStacks':[[],['red'],['green'],['blue']]}},
+    {'name': 'democratie', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red','green','blue'], 'maxColors': 3, 'startStacks':[[]]}},    
     ]
   _speeds = [{'fps': 100,'step': 1},{'fps': 150,'step': 2},{'fps': 250,'step': 4},{'fps': 400,'step': 5},{'fps': 500,'step': 10},{'fps': 500,'step': 20}]
   EMPTY = ''
@@ -114,6 +116,7 @@ class RobotArm:
   _screenMargin = 3
   _eventSleepTime = 300
   _eventActiveCycles = 100
+  _steps = 0
   _iconImage = 'robotarm.ico'
   _hazardSprite = 'caution-icon-hi.png'
   _hazardFont = 'FreeSansBold.ttf'
@@ -229,7 +232,8 @@ class RobotArm:
       self._drawBoxAtPosition(self._armX,self._armHeight,self._getColorCode(self._color))
 
   def _drawState(self):
-    pygame.display.set_caption('Robotarm: ' + self._levelName)
+    steps = ' ['+ str(self._steps)+']' if self._steps > 0 else ''
+    pygame.display.set_caption('Robotarm: ' + self._levelName + steps)
     self._screen.fill(self._backgroundColor)
     for c in range(len(self._yard)):
       self._drawStack(c)
@@ -322,6 +326,7 @@ class RobotArm:
   
   ########### ROBOTARM MANIPULATION ###########
   def moveRight(self):
+    self._steps += 1
     self._efficiencyCheck('right')
     success = False
     if self._stack < self._maxStacks - 1:
@@ -333,6 +338,7 @@ class RobotArm:
     return success
 
   def moveLeft(self):
+    self._steps += 1
     self._efficiencyCheck('left')
     success = False
     if self._stack > 0:
@@ -344,6 +350,7 @@ class RobotArm:
     return success
 
   def grab(self):
+    self._steps += 1
     self._efficiencyCheck('grab')
     success = False
     if self._color == self.EMPTY:
@@ -360,6 +367,7 @@ class RobotArm:
     return success
 
   def drop(self):
+    self._steps += 1
     self._efficiencyCheck('drop')
     success = False
     if self._color != self.EMPTY:
@@ -376,6 +384,7 @@ class RobotArm:
     return success
   
   def scan(self):
+    self._steps += 1
     self._efficiencyCheck('scan')
     return self._color
 
@@ -397,6 +406,7 @@ class RobotArm:
     return {'yard' : yard, 'success' : success}
 
   def loadMyLevel(self, yard, levelName = 'unknown level'):
+    self._steps = 0
     result = self._checkYard(yard)
     self._yard = result['yard'] # sanitized yard
     success = result['success'] # where there errors?
@@ -431,10 +441,10 @@ class RobotArm:
         return False
     return True
 
-  def _createRandomYard(self, maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors):
-    yard = []
+  def _createRandomYard(self, maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors, startStacks, endStacks):
+    yard = [] + startStacks
     while len(yard) == 0 or not self._requiredColorsFound(yard, requiredColors):
-      yard = []
+      yard = [] + startStacks
       for l in range(maxStacks):
         random.seed()
         stack = []
@@ -443,7 +453,10 @@ class RobotArm:
           color = colors[random.randint(0,len(colors)-1)]
           stack.append(color)
         yard.append(stack)
-    return yard 
+    for stack in endStacks:
+      if len(yard) < 10:
+        yard.append(stack)
+    return yard
 
   def _randomColors(self, requiredColors, maxColors):
     colors = []
@@ -465,9 +478,11 @@ class RobotArm:
     requiredColors = requirements['requiredColors'] if 'requiredColors' in requirements else []
     levelName = requirements['levelName'] if 'levelName' in requirements else 'random level'
     maxColors = requirements['maxColors'] if 'maxColors' in requirements else 4
+    startStacks = requirements['startStacks'] if 'startStacks' in requirements else []
+    endStacks = requirements['endStacks'] if 'endStacks' in requirements else []
 
     colors = self._randomColors(requiredColors, maxColors)
-    myYard = self._createRandomYard(maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors)
+    myYard = self._createRandomYard(maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors, startStacks, endStacks)
     self.loadMyLevel(myYard, levelName)
 
   def randomLevel(self, stacks, layers):
