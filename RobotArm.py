@@ -1,5 +1,6 @@
 import pygame # install in terminal with: pip install pygame
 from SpriteSheet import SpriteSheet
+import os 
 import sys
 import random
 
@@ -140,7 +141,6 @@ class RobotArm:
     self.speed = 1
     self._yard = []
 
-
     pygame.init()
     self._clock = pygame.time.Clock()
     
@@ -148,22 +148,23 @@ class RobotArm:
     self._screenHeight = self._layerY(-1) + self._bottomMargin + 2 * self._screenMargin
     self._screen = pygame.display.set_mode((self._screenWidth, self._screenHeight))
 
+    assetsDir = os.path.dirname(os.path.realpath(__file__)) + '/'    # force assets to be found in directory of robotarm.py
     try:
-      programIcon = pygame.image.load(self._iconImage)
+      programIcon = pygame.image.load(assetsDir + self._iconImage)
       pygame.display.set_icon(programIcon)
       self._testImage = programIcon
     except:
       print(f' ********* icon image: {self._iconImage} not found *********')
 
     try:
-      ss = SpriteSheet(self._hazardSprite)
+      ss = SpriteSheet(assetsDir + self._hazardSprite)
       self._hazardSign = ss.load_strip((0,0,64,64), 4, self._backgroundColor)
     except:
       print(f' ********* hazard sprite: {self._hazardSprite} not found *********')
       exit()
 
     try:
-      self._font = pygame.font.Font(self._hazardFont, 24)
+      self._font = pygame.font.Font(assetsDir + self._hazardFont, 24)
     except:
       print(f' ********* font: {self._hazardFont} not found *********')
       exit()
