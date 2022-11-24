@@ -1,6 +1,6 @@
 import pygame # install in terminal with: pip install pygame
 from SpriteSheet import SpriteSheet
-import os 
+import os
 import sys
 import random
 
@@ -14,7 +14,7 @@ import random
 #   lets you inspect the yard for debugging purposes
 #
 #   supported colors are: white, green, red, blue and yellow
-# 
+#
 # ######## methods for public use:
 #   moveRight()
 #     moves the robotarm one stack position to the right
@@ -44,12 +44,12 @@ import random
 #       make the robotarm operate on keyboard-keys: LEFT, RIGHT and DOWN
 #
 # ######## creating and loading levels ########
-#   
+#
 #   loadLevel(levelName)
 #     loads a predefined level for levelName {string}
 #     returns True if succeeded, returns False if failed
-#     
-#   loadMyLevel(yard, levelName) 
+#
+#   loadMyLevel(yard, levelName)
 #     loads a self made yard with a self made levelName {string}
 #     where yard is a list of stacks each stack is a list of colors
 #       box colors example of a yard: [['red','green'],['red','blue'],[],['green']]
@@ -74,6 +74,11 @@ import random
 # ###########################################################
 
 class RobotArm:
+  version = 2.3
+# 2.1: incluses warnings for actions like hitting the borders
+# 2.2: includes flaw terminal warnings for pointless actions
+# 2.3: may grab once without warning from empty stack that was randomly sized
+
   _colors = [
     {"name": 'white', 'code': (255,255,255)},
     {"name": 'red', 'code': (255,0,0)},
@@ -99,7 +104,7 @@ class RobotArm:
     {'name': 'exercise 14', 'yard' : [[],["green"],["white"],["green","white"],["red","white"],["white","white"],["blue"],["blue","blue","blue"],["blue", "green", "green"],["red"]]},
     {'name': 'exercise 15', 'yard' : [[],["blue"],[],["blue"],["white"],[],["red"],["green"],["red"],["green"]]},
     {'name': 'soorten', 'yard' : {'maxStacks': 6, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red','green','blue'], 'maxColors': 3, 'endStacks':[[],['red'],['green'],['blue']]}},
-    {'name': 'democratie', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red','green','blue'], 'maxColors': 3, 'startStacks':[[]]}},    
+    {'name': 'democratie', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red','green','blue'], 'maxColors': 3, 'startStacks':[[]]}},
     ]
   _speeds = [{'fps': 100,'step': 1},{'fps': 150,'step': 2},{'fps': 250,'step': 4},{'fps': 400,'step': 5},{'fps': 500,'step': 10},{'fps': 500,'step': 20}]
   EMPTY = ''
@@ -131,6 +136,7 @@ class RobotArm:
     ['drop','scan'],
   ]
   reportFlaws = False
+  _knownEmpty = []
 
   def __init__(self, levelName = ''):
     self._color = self.EMPTY
@@ -143,7 +149,7 @@ class RobotArm:
 
     pygame.init()
     self._clock = pygame.time.Clock()
-    
+
     self._screenWidth = self._stackX(self._maxStacks) + self._screenMargin
     self._screenHeight = self._layerY(-1) + self._bottomMargin + 2 * self._screenMargin
     self._screen = pygame.display.set_mode((self._screenWidth, self._screenHeight))
@@ -252,7 +258,7 @@ class RobotArm:
         self._screen.blit(text, ((self._screenWidth//2) - text.get_rect().width//2,60))
       pygame.display.update()
       pygame.time.delay(100)
-      
+
     self._drawState()
     pygame.display.update()
 
@@ -290,10 +296,10 @@ class RobotArm:
 
       for event in pygame.event.get():
         self.checkCloseEvent(event)
-      
+
       self._drawState()
       pygame.display.update()
-      
+
       self._clock.tick(self._speeds[self.speed]['fps'])
 
       if (args[0] == 'down'):
@@ -324,7 +330,7 @@ class RobotArm:
         print(f'action flaw: {flawText}' )
         if self.reportFlaws: self._animateFlaw(flawText)
     self._previousAction = action
-  
+
   ########### ROBOTARM MANIPULATION ###########
   def moveRight(self):
     self._steps += 1
@@ -361,7 +367,10 @@ class RobotArm:
         self._yard[self._stack].pop(-1)
         success = True
       else:
-        self._animateHazard('nothing to grab!')
+        if self._knownEmpty[self._stack]:
+          self._animateHazard('nothing to grab!')
+        else:
+          self._knownEmpty[self._stack] = True
       self._animate('up')
     else:
       self._animateHazard('robot arm occupied!')
@@ -383,7 +392,7 @@ class RobotArm:
     else:
       self._animateHazard('no box to drop!')
     return success
-  
+
   def scan(self):
     self._steps += 1
     self._efficiencyCheck('scan')
@@ -415,9 +424,9 @@ class RobotArm:
       self._yard.append([])
     self._levelName = levelName
     self._animate('idle')
-    
+
     return success
- 
+
   def loadLevel(self, levelName):
     success = False
     for level in self._defaultlevels:
@@ -427,6 +436,7 @@ class RobotArm:
           self.loadRandomLevel(level['yard'])
         else:
           self.loadMyLevel(level['yard'], levelName)
+          self._knownEmpty = [True for stack in range(self._maxStacks)]
         success = True
     if not success:
       self.loadMyLevel([])
@@ -469,7 +479,7 @@ class RobotArm:
       if not color in colors:
         colors.append(color)
     return colors
-        
+
   def loadRandomLevel(self, requirements = {}):
     maxStacks = requirements['maxStacks'] if 'maxStacks' in requirements else 6
     maxStacks = self._maxStacks if maxStacks > self._maxStacks else maxStacks
@@ -485,6 +495,10 @@ class RobotArm:
     colors = self._randomColors(requiredColors, maxColors)
     myYard = self._createRandomYard(maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors, startStacks, endStacks)
     self.loadMyLevel(myYard, levelName)
+    self._knownEmpty = [True for stack in range(self._maxStacks)]
+    if minBoxes != maxBoxes:
+      for stack in range(len(startStacks), len(startStacks) + maxStacks):
+        self._knownEmpty[stack] = False
 
   def randomLevel(self, stacks, layers):
     self.loadRandomLevel({'maxStacks': stacks, 'maxBoxes': layers})
@@ -496,10 +510,10 @@ class RobotArm:
 
   def checkCloseEvent(self,event):
     if event.type == pygame.QUIT:
-      sys.exit()    
+      sys.exit()
 
   def _defaultHandler(self, events):
-    for event in events: 
+    for event in events:
       self.checkCloseEvent(event)
 
   def wait(self, handler = False):
@@ -514,7 +528,7 @@ class RobotArm:
 
       cycle += 1                                # prepare for sleep
 
-      if cycle > self._eventActiveCycles:       # after 30 cycles 
+      if cycle > self._eventActiveCycles:       # after 30 cycles
         pygame.time.delay(self._eventSleepTime) # go asleep for 300 milliseconds, give the processor some rest
         cycle = 0                               # wake up for events during sleep
 
@@ -533,3 +547,6 @@ class RobotArm:
 
   def operate(self):
     self.wait(self._operator)
+
+if __name__ == "__main__":
+  print('tested module RobotArm')
