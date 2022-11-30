@@ -74,10 +74,11 @@ import random
 # ###########################################################
 
 class RobotArm:
-  version = 2.3
+  version = '2.3.1'
 # 2.1: incluses warnings for actions like hitting the borders
 # 2.2: includes flaw terminal warnings for pointless actions
 # 2.3: may grab once without warning from empty stack that was randomly sized
+# 2.3.1: added handling key UP en DOWN for speeding up and down, while running animations
 
   _colors = [
     {"name": 'white', 'code': (255,255,255)},
@@ -296,6 +297,7 @@ class RobotArm:
 
       for event in pygame.event.get():
         self.checkCloseEvent(event)
+        self.handleSpeedEvent(event)
 
       self._drawState()
       pygame.display.update()
@@ -323,8 +325,6 @@ class RobotArm:
 
   def _efficiencyCheck(self, action):
     for flaw in self._actionFlaws:
-      # print(f'checking flaws for {self._previousAction} and {action}')
-      # print(f'against flaws for {flaw[0]} and {flaw[1]}')
       if (self._previousAction == flaw[0] and action == flaw[1]):
         flawText = f'{flaw[1]} after {flaw[0]}? why?'
         print(f'action flaw: {flawText}' )
@@ -511,6 +511,15 @@ class RobotArm:
   def checkCloseEvent(self,event):
     if event.type == pygame.QUIT:
       sys.exit()
+
+  def handleSpeedEvent(self,event):
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_UP:
+          if self.speed < 5:
+            self.speed += 1
+        elif event.key == pygame.K_DOWN:
+          if self.speed > 0:
+            self.speed -= 1
 
   def _defaultHandler(self, events):
     for event in events:
