@@ -148,7 +148,7 @@ robotArm.wait()
 ```
 Verplaats alle stapels vijf stappen naar rechts.
 
-Je mag maximaal 12 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
+Je mag maximaal 13 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
 
 ![Oefening 9](readme/exercise9.png)
 
