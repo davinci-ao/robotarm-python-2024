@@ -112,7 +112,7 @@ robotArm.wait()
 ```
 Verplaats iedere stapel één plek naar links.
 
-Je mag maximaal 11 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
+Je mag maximaal 12 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
 
 ![Oefening 7](readme/exercise7.png)
 
@@ -130,7 +130,7 @@ robotArm.wait()
 ```
 Verplaats de stapel naar de rechterkant.
 
-Je mag maximaal 12 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
+Je mag maximaal 13 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
 
 ![Oefening 8](readme/exercise8.png)
 
