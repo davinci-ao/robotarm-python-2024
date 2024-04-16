@@ -3,6 +3,9 @@ from SpriteSheet import SpriteSheet
 import os
 import sys
 import random
+import string
+import inspect
+from math import ceil, floor
 
 # RobotArm class ################################################
 #
@@ -52,60 +55,49 @@ import random
 #   loadMyLevel(yard, levelName)
 #     loads a self made yard with a self made levelName {string}
 #     where yard is a list of stacks each stack is a list of colors
-#       box colors example of a yard: [['red','green'],['red','blue'],[],['green']]
+#       box colors example of a yard: [['r','g'],['r','b'],[],['g']]
 #     returns True if succeeded, returns False if errors found, but sanitized
-#
-#   randomLevel(stacks, layers)
-#     loads a simple random level with stacks and layers
-#
-#   loadRandomLevel(requirements )
-#     loads a random level with optional requirements
-#       requirements dictionary can contain key-values:
-#         maxStacks {int}:  number of random stacks to provide
-#         minBoxes {int}: minmum number of boxes provided per stack
-#         maxBoxes {int}: maximum number of boxes provided per stack
-#         maxColors {int}: maximum number of colors provided in the yard
-#         requiredColors {list of string}: list of required colors
-#         levelName {string}: name of the level
-#
-#   inspectYard()
-#     prints the yard data, for inspection during debugging
 #
 # ###########################################################
 
 class RobotArm:
-  version = '2.3.1'
+  version = '2.4'
 # 2.1: incluses warnings for actions like hitting the borders
 # 2.2: includes flaw terminal warnings for pointless actions
 # 2.3: may grab once without warning from empty stack that was randomly sized
 # 2.3.1: added handling key UP en DOWN for speeding up and down, while running animations
+# 2.4: 
 
   _colors = [
-    {"name": 'white', 'code': (255,255,255)},
-    {"name": 'red', 'code': (255,0,0)},
-    {"name": 'green', 'code': (0,150,0)},
-    {"name": 'blue', 'code': (0,0,255)},
-    {"name": 'yellow', 'code': (255,255,0)}
+    {"name": 'w', 'code': (255,255,255), 'c': 'w'},
+    {"name": 'r', 'code': (255,0,0), 'c': 'r'},
+    {"name": 'g', 'code': (0,150,0), 'c': 'g'},
+    {"name": 'b', 'code': (0,0,255), 'c': 'b'},
+    {"name": 'y', 'code': (255,255,0), 'c': 'y'},
+    {"name": 'p', 'code': (128,0,128), 'c': 'p'},
+    {"name": 'o', 'code': (255,128,0), 'c': 'o'},
+    {"name": 'd', 'code': (10,10,10), 'c': 'd'},
   ]
+  _colorSet = [color['name'] for color in _colors]
   _defaultlevels = [
-    {'name': 'exercise 1', 'yard' : [[],["red"]]},
-    {'name': 'exercise 2', 'yard' : [["blue"],[],[],[],["blue"],[],[],["blue"]]},
-    {'name': 'exercise 3', 'yard' : [["white","white","white","white"]]},
-    {'name': 'exercise 4', 'yard' : [["blue","white", "green","red","white"]]},
-    {'name': 'exercise 6', 'yard' : [[],["red","white","red","white","red","white"]]},
-    {'name': 'exercise 5', 'yard' : [["red"],["blue"],["white"],["green"],["green"],["blue"],["red"],["white"]]},
+    {'name': 'exercise 1',  'yard' : ',r', 'symbols' : '#=8+2,$=4','solution': 'r' },
+    {'name': 'exercise 2',  'yard' : 'b,,,,b,,,b' , 'symbols' : '#=20,$=29', 'solution': ',,,,,,,,,bbb'  },
+    {'name': 'exercise 3',  'yard' : 'wwww', 'symbols':'#=9,$=16','solution': ',wwww'},
+    {'name': 'exercise 4',  'yard' : 'bwgrw', 'symbols':'#=50,$=100','solution': ',bwgrw'},
+    {'name': 'exercise 6',  'yard' : ',rwrwrw', 'symbols':'','solution': 'www,,rrr'},
+    {'name': 'exercise 5',  'yard' : 'r,b,w,g,g,b,r,w', 'symbols':'','solution': ',r,b,w,g,g,b,r,w'},
+    {'name': 'exercise 7',  'yard' : ',6b,,6b,,6b,,6b,,6b', 'symbols':'','solution': '6b,,6b,,6b,,6b,,6b'},
+    {'name': 'exercise 8',  'yard' : ',7r', 'symbols':'','solution': ',,,,,,,,,7r'},
+    {'name': 'exercise 9',  'yard' : 'b,gg,www,rrrr', 'symbols':'','solution': ',,,,,b,gg,www,rrrr'},
+    {'name': 'exercise 10', 'yard' : 'g,b,w,r,b', 'symbols':'','solution': ',,,,,b,r,w,b,g'},
 
-    {'name': 'exercise 7', 'yard' : [[],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"], [],["blue","blue","blue","blue","blue","blue"],[],["blue","blue","blue","blue","blue","blue"]]},
-    {'name': 'exercise 8', 'yard' : [[],["red","red","red","red","red","red","red"]]},
-    {'name': 'exercise 9', 'yard' : [["blue"],["green", "green"],["white","white","white"],["red","red","red","red"]]},
-    {'name': 'exercise 10', 'yard' : [["green"],["blue"],["white"],["red"],["blue"]]},
-    {'name': 'exercise 11', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['white'], 'maxColors': 4}},
-    {'name': 'exercise 12', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red'], 'maxColors': 4}},
-    {'name': 'exercise 13', 'yard' : [["green"],["green"],["green"],["blue"],["white"],["green"],["red"],["red"],["blue"],["green"]]},
-    {'name': 'exercise 14', 'yard' : [[],["green"],["white"],["green","white"],["red","white"],["white","white"],["blue"],["blue","blue","blue"],["blue", "green", "green"],["red"]]},
-    {'name': 'exercise 15', 'yard' : [[],["blue"],[],["blue"],["white"],[],["red"],["green"],["red"],["green"]]},
-    {'name': 'soorten', 'yard' : {'maxStacks': 6, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red','green','blue'], 'maxColors': 3, 'endStacks':[[],['red'],['green'],['blue']]}},
-    {'name': 'democratie', 'yard' : {'maxStacks': 9, 'minBoxes': 1, 'maxBoxes': 1, 'requiredColors': ['red','green','blue'], 'maxColors': 3, 'startStacks':[[]]}},
+    {'name': 'exercise 11', 'yard' : 'x,x,x,x,x,x,x,x,x,', 'symbols': 'x-wwwwrgbyrgby'},
+    {'name': 'exercise 12', 'yard' : 'x,x,x,x,x,x,x,x,x,', 'symbols': 'x-rrrrwgbywgby'},
+    {'name': 'exercise 13', 'yard' : 'g,g,g,b,w,g,r,r,b,g'},
+    {'name': 'exercise 14', 'yard' : ',g,w,gw,rw,ww,b,bbb,bgg,r'},
+    {'name': 'exercise 15', 'yard' : ',b,,b,w,,r,g,g,g'},
+    {'name': 'soorten',     'yard' : 'x,x,x,x,x,x,,r,g,b', 'symbols':'x-rrrrbbbbgggg'},
+    {'name': 'democratie',  'yard' : ',x,x,x,x,x,x,x,x,x', 'symbols':'x-rrrryyyybbbb'},
     ]
   _speeds = [{'fps': 100,'step': 1},{'fps': 150,'step': 2},{'fps': 250,'step': 4},{'fps': 400,'step': 5},{'fps': 500,'step': 10},{'fps': 500,'step': 20}]
   EMPTY = ''
@@ -123,21 +115,45 @@ class RobotArm:
   _screenMargin = 3
   _eventSleepTime = 300
   _eventActiveCycles = 100
-  _steps = 0
+  _steps = 0 # amount of actions done
   _iconImage = 'robotarm.ico'
   _hazardSprite = 'caution-icon-hi.png'
   _hazardFont = 'FreeSansBold.ttf'
   _previousAction = ''
+  _accuWidth = 15
+  _accuCapacity = False
+  _accuPadding = 5
+  _accuColors = ((100,'g'),(50, 'y'),(25, 'o'),(10, 'r'))
   _actionFlaws = [
     ['left','right'],
     ['right','left'],
-    ['drop','grap'],
+    ['drop','grab'],
     ['grab','drop'],
     ['scan','scan'],
     ['drop','scan'],
   ]
   reportFlaws = False
   _knownEmpty = []
+
+  def count_lines_of_code(self):
+    current_frame = inspect.currentframe()
+    while current_frame.f_back:
+        current_frame = current_frame.f_back
+    caller_filename = inspect.getframeinfo(current_frame).filename
+    with open(caller_filename, 'r') as f:
+      lines = f.readlines()
+    num_lines = 0
+    for line in lines:
+      line = line.strip()
+      if line and not line.startswith("#") and not line.startswith("print(") and not line.startswith("input("):
+        num_lines += 1
+    print(f'codelines:{num_lines}')
+    return num_lines
+
+  def _setScreen(self):
+    self._screenWidth = self._stackX(self._maxStacks) + self._screenMargin 
+    self._screenHeight = self._layerY(-1) + self._bottomMargin + 2 * self._screenMargin
+    self._screen = pygame.display.set_mode((self._screenWidth + self._accuWidth, self._screenHeight))
 
   def __init__(self, levelName = ''):
     self._color = self.EMPTY
@@ -151,9 +167,7 @@ class RobotArm:
     pygame.init()
     self._clock = pygame.time.Clock()
 
-    self._screenWidth = self._stackX(self._maxStacks) + self._screenMargin
-    self._screenHeight = self._layerY(-1) + self._bottomMargin + 2 * self._screenMargin
-    self._screen = pygame.display.set_mode((self._screenWidth, self._screenHeight))
+    self._setScreen()
 
     assetsDir = os.path.dirname(os.path.realpath(__file__)) + '/'    # force assets to be found in directory of robotarm.py
     try:
@@ -187,6 +201,12 @@ class RobotArm:
       if c['name'] == name:
         return c['code']
     return False
+  
+  def _getColorByName(self, name):
+    for c in self._colors:
+      if c['name'] == name:
+        return c
+    return self.colors[-1]
 
   def _checkSpeed(self):
     speedInvalid = False
@@ -239,6 +259,31 @@ class RobotArm:
     if self._color > '':
       self._drawBoxAtPosition(self._armX,self._armHeight,self._getColorCode(self._color))
 
+  def _drawAccu(self):
+    if self._accuCapacity ==  False: return
+    # pygame.draw.rect(self._screen, (0,150,0), (self._screenWidth, 0, self._accuWidth, self._screenHeight))
+    _stepsDone  = self._steps if self._steps < self._accuCapacity else self._accuCapacity
+    _accuOver = (self._accuCapacity - _stepsDone) / self._accuCapacity
+    _accuDone = _stepsDone / self._accuCapacity
+    _accuPerc = ceil(_accuOver * 100)
+
+    pygame.draw.rect(self._screen, (0,0,0), (self._screenWidth, 0, self._accuWidth, self._screenHeight))
+    _x0 = self._screenWidth + self._accuPadding
+    _y0 = 0 + self._accuPadding
+    _w0 = self._accuWidth - 2 * self._accuPadding
+    _h0 = self._screenHeight  - 2 * self._accuPadding
+
+    _x = _x0
+    _y = self._accuPadding+ ceil(_h0 * _accuDone)
+    _h = floor(_h0 * _accuOver)
+    color = 'g'
+    for percColor in self._accuColors:
+      if _accuPerc < percColor[0]:
+        color = percColor[1]
+  
+    pygame.draw.rect(self._screen, self._getColorCode(color), (_x0, _y, _w0, _h))
+    pass
+
   def _drawState(self):
     steps = ' ['+ str(self._steps)+']' if self._steps > 0 else ''
     pygame.display.set_caption('Robotarm: ' + self._levelName + steps)
@@ -246,6 +291,7 @@ class RobotArm:
     for c in range(len(self._yard)):
       self._drawStack(c)
     self._drawArm()
+    self._drawAccu()
 
   def _message(self, message = 'problem!', gravity = 1):
     xm = self._armX + int(self._boxSpaceWidth()/2) - self._boxMargin - 31
@@ -323,6 +369,22 @@ class RobotArm:
       elif (args[0] == 'idle'):
         pygame.time.delay(self._idleAnimationTime)
 
+  def _hasStepsLeft(self):
+    return self._accuCapacity == False or (self._accuCapacity - self._steps) > 0
+
+  def _canStep(self)->bool:
+    if self._hasStepsLeft():
+      self._steps += 1
+      return True    
+
+    if self._accuEmpty == False:
+        print('accu empty, steps to do:')
+        self._accuEmpty = True
+    sys.stdout.write('.')
+    sys.stdout.flush()
+    return False
+
+
   def _efficiencyCheck(self, action):
     for flaw in self._actionFlaws:
       if (self._previousAction == flaw[0] and action == flaw[1]):
@@ -333,7 +395,7 @@ class RobotArm:
 
   ########### ROBOTARM MANIPULATION ###########
   def moveRight(self):
-    self._steps += 1
+    if not self._canStep(): return
     self._efficiencyCheck('right')
     success = False
     if self._stack < self._maxStacks - 1:
@@ -345,7 +407,7 @@ class RobotArm:
     return success
 
   def moveLeft(self):
-    self._steps += 1
+    if not self._canStep(): return
     self._efficiencyCheck('left')
     success = False
     if self._stack > 0:
@@ -357,7 +419,7 @@ class RobotArm:
     return success
 
   def grab(self):
-    self._steps += 1
+    if not self._canStep(): return
     self._efficiencyCheck('grab')
     success = False
     if self._color == self.EMPTY:
@@ -377,7 +439,7 @@ class RobotArm:
     return success
 
   def drop(self):
-    self._steps += 1
+    if not self._canStep(): return
     self._efficiencyCheck('drop')
     success = False
     if self._color != self.EMPTY:
@@ -391,120 +453,259 @@ class RobotArm:
         self._animateHazard('stack full!')
     else:
       self._animateHazard('no box to drop!')
+    self._watchSolution()
     return success
 
   def scan(self):
-    self._steps += 1
+    if not self._canStep(): return
     self._efficiencyCheck('scan')
     return self._color
 
 ########### LEVEL & YARD lOADING & CREATION ###########
 
-  def _checkYard(self,yard):
-    success = True
-    if type(yard) is not list:
-      yard = []
-      success = False
-    for s in range(len(yard)):
-      if type(yard[s]) is not list:
-        yard[s] = []
-        success = False
-      for c in range(len(yard[s])):
-        if self._getColorCode(yard[s][c]) == False:
-          yard[s][c] = 'white'
-          success = False
-    return {'yard' : yard, 'success' : success}
+  def _checkSolution(self):
+    serializedYard = self.serializeYard()
+    if self._solution:
+      if self._solution == serializedYard:
+        return True
+      else:
+        return False
+    
+    # check if all rules do apply, if so solution is reached
+    
+    # stdColorSet = ''.join(self._colorSet)
+    # _rules = self._rules.split(',')
+    # ok = True
+    # for rule in _rules:
+    #   rule = rule.strip()
+    #   if rule[0] in stdColorSet:
+    #     if rule[1] == '>' and rule[2] in string.digits:
+    #       tryYard = self.yardInitial + []
+    #       dist = int(rule[2])
+    #       color = rule[0]
+    #       for stackIndex in range(self._maxStacks-1,-1,-1):
+    #         newStackIndex = stackIndex + dist 
+    #         if newStackIndex < self._maxStacks: 
+    #           stack = tryYard[stackIndex]
+    #           for boxIndex in range(len(stack)-1,-1,-1):
+    #             if stack[boxIndex] == color:
+    #               stack.pop(boxIndex)
+    #               tryYard[newStackIndex].append(color)
+    #       for stack in tryYard:
+    #         if stack
 
-  def loadMyLevel(self, yard, levelName = 'unknown level'):
+    # return ok
+  
+  def _watchSolution(self):
+    if self._checkSolution():
+      print(f'Solution reached in {self._steps} steps')
+      
+  def _checkCodeMax(self,codeMax):
+    if codeMax != False:
+      lines = self.count_lines_of_code()
+      exceeded = lines - codeMax
+      if exceeded > 0:
+        print(f'*****************************************************')
+        print(f'* Progam contains: {  lines:3} lines of code                *')           
+        print(f'* Maximum allowed lines of:{codeMax:3} has been exceeded!   *')
+        print(f'*****************************************************')
+
+  def loadMyLevel(self, yard, levelName = 'unknown', accu = False, codeMax = False, solution = '' ,rules = ''):
+    self._checkCodeMax(codeMax)
+    if solution:
+      solution += (self._maxStacks - solution.count(',')) * ','
+    self._solution = solution
+    self._rules = rules
     self._steps = 0
-    result = self._checkYard(yard)
-    self._yard = result['yard'] # sanitized yard
-    success = result['success'] # where there errors?
+    self._yard = yard # sanitized yard
+    self._yardInitial = yard + []
     while len(self._yard) < self._maxStacks:
       self._yard.append([])
     self._levelName = levelName
+    self._accuCapacity = accu
+    self._accuEmpty = False
     self._animate('idle')
 
+    return True
+
+  def constructYard(self, yard = 'r', symbols = '' ):
+    colorSymbols = string.ascii_lowercase + '?'
+    amountSymbols = string.ascii_uppercase + '*'
+    stdColorSet = ''.join(self._colorSet)
+     # determine symbols in the yard
+    symbols = symbols.split(',')
+    _accu = False
+    _codeMax = False
+    _symbols = {}
+    _symbols['?'] = {'colors' : list('rgbw'), 'proces': '?'} # default random color symbol
+    _symbols['*'] = {'value' : 4, 'proces': '?'} # default random amount symbol
+    for symbol in symbols:
+      if len(symbol) < 3: continue
+
+      if symbol[0] in amountSymbols and symbol[2] in string.digits:
+        _symbols[symbol[0]] = {'value' : int(symbol[2]), 'proces': symbol[1]}
+
+      if symbol[0] in colorSymbols:
+        # get valid colorset
+        colorset = ''
+        for c in symbol[2:]:
+          if c in stdColorSet:
+            colorset += c
+        if colorset == '': colorset = stdColorSet
+        _symbols[symbol[0]] = {'value': False, 'colors' : list(colorset), 'proces': symbol[1], 'reset': list(colorset)}
+      if symbol[0] == '$':
+        try:
+          _accu = int(symbol[2:])
+        except: pass
+      if symbol[0] == '#':
+        try:
+          _codeMax = int(symbol[2:])
+        except: pass      
+    stacks = yard.split(',')
+
+    _yard = []
+    for stack in stacks:
+      _stack = []
+      amountBoxes = 1
+      color = False
+      for char in _symbols:
+        if _symbols[char]['proces'] == '|':
+          _symbols[char]['colors'] = _symbols[char]['reset'] + [] # every stack a new color set
+      for char in stack:
+        if char in colorSymbols:
+          for _ in range(amountBoxes):
+            if char in _symbols:
+              if _symbols[char]['proces'] == '?':
+                color = random.choice(_symbols[char]['colors'])
+              elif _symbols[char]['proces'] in ['-','|']:
+                color = random.choice(_symbols[char]['colors'])
+                _symbols[char]['colors'].remove(color)
+                if len(_symbols[char]['colors']) == 0:
+                  _symbols[char]['colors'].append('d')
+              elif _symbols[char]['proces'] == '>':
+                color = _symbols[char]['colors'][_symbols[char]['value']]
+                _symbols[char]['value'] = (_symbols[char]['value']+1) % len(_symbols[char]['colors'])
+              elif _symbols[char]['proces'] == '<':
+                color = _symbols[char]['colors'][_symbols[char]['value']]
+                _symbols[char]['value'] = (_symbols[char]['value']-1+len(_symbols[char]['colors'])) % len(_symbols[char]['colors'])
+              elif _symbols[char]['proces'] == '=':
+                if _symbols[char]['value'] == False:
+                  _symbols[char]['value'] = random.randint(0,len(_symbols[char]['colors'])-1)
+                color = _symbols[char]['colors'][_symbols[char]['value']]
+            elif char in stdColorSet:
+              color = char
+            if color not in stdColorSet:
+              color = self.colorSet[-1] # pick deault last of colors
+            if len(_stack) < self._maxLayers:
+              _stack.append(color)
+          amountBoxes = 1
+        elif char in string.digits:
+          amountBoxes = int(char)
+        elif char in amountSymbols and char in _symbols:
+          if _symbols[char]['proces'] == '?':
+            amountBoxes = random.randint(0,_symbols[char]['value'])
+          else:
+            amountBoxes = _symbols[char]['value']
+            if _symbols[char]['proces'] == '+':
+              _symbols[char]['value'] += 1
+            if _symbols[char]['proces'] == '-':
+              _symbols[char]['value'] -= 1
+              if _symbols[char]['value'] < 0: 
+                _symbols[char]['value'] = 0
+      _yard.append(_stack)
+
+    while len(_yard) < self._maxStacks:
+      _yard.append([])
+    return _yard, _accu, _codeMax
+  
+  def load (self, yard: str = 'r', symbols: str = '', solution: str = '', rules: str = ''):
+    _yard, _accu, _codeMax = self.constructYard(yard, symbols)
+    
+    success = self.loadMyLevel(_yard,'self made', _accu, _codeMax, solution, rules)
+    self._knownEmpty = [True for stack in range(self._maxStacks)]
     return success
 
   def loadLevel(self, levelName):
     success = False
     for level in self._defaultlevels:
       if levelName == level['name']:
-        if type(level['yard']) is dict:
-          level['yard']['levelName'] = levelName
-          self.loadRandomLevel(level['yard'])
-        else:
-          self.loadMyLevel(level['yard'], levelName)
+        if type(level['yard']) is str:
+          _yard, _accu, _codeMax = self.constructYard(level['yard'], level.get('symbols',''))
+          _solution = level.get('solution','')
+          _rules = level.get('rules','')
+          self.loadMyLevel(_yard, levelName, _accu, _codeMax, _solution, _rules)
           self._knownEmpty = [True for stack in range(self._maxStacks)]
-        success = True
+          success = True
     if not success:
       self.loadMyLevel([])
     return success
 
-  def _requiredColorsFound(self, yard, requiredColors):
-    colors = []
-    for stack in yard:
-      for color in stack:
-        colors.append(color)
-    for color in requiredColors:
-      if colors.count(color) == 0:
-        return False
-    return True
+  # def _requiredColorsFound(self, yard, requiredColors):
+  #   colors = []
+  #   for stack in yard:
+  #     for color in stack:
+  #       colors.append(color)
+  #   for color in requiredColors:
+  #     if colors.count(color) == 0:
+  #       return False
+  #   return True
 
-  def _createRandomYard(self, maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors, startStacks, endStacks):
-    yard = [] + startStacks
-    while len(yard) == 0 or not self._requiredColorsFound(yard, requiredColors):
-      yard = [] + startStacks
-      for l in range(maxStacks):
-        random.seed()
-        stack = []
-        height = random.randint(minBoxes, maxBoxes)
-        for b in range(height):
-          color = colors[random.randint(0,len(colors)-1)]
-          stack.append(color)
-        yard.append(stack)
-    for stack in endStacks:
-      if len(yard) < 10:
-        yard.append(stack)
-    return yard
+  # def _createRandomYard(self, maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors, startStacks, endStacks):
+  #   yard = [] + startStacks
+  #   while len(yard) == 0 or not self._requiredColorsFound(yard, requiredColors):
+  #     yard = [] + startStacks
+  #     for l in range(maxStacks):
+  #       random.seed()
+  #       stack = []
+  #       height = random.randint(minBoxes, maxBoxes)
+  #       for b in range(height):
+  #         color = colors[random.randint(0,len(colors)-1)]
+  #         stack.append(color)
+  #       yard.append(stack)
+  #   for stack in endStacks:
+  #     if len(yard) < 10:
+  #       yard.append(stack)
+  #   return yard
 
-  def _randomColors(self, requiredColors, maxColors):
-    colors = []
-    for color in requiredColors:
-      if not color in colors:
-        colors.append(color)
-    while len(colors) < maxColors:
-      color = self._colors[random.randint(0,len(self._colors)-1)]['name']
-      if not color in colors:
-        colors.append(color)
-    return colors
+  # def _randomColors(self, requiredColors, maxColors):
+  #   colors = []
+  #   for color in requiredColors:
+  #     if not color in colors:
+  #       colors.append(color)
+  #   while len(colors) < maxColors:
+  #     color = self._colors[random.randint(0,len(self._colors)-1)]['name']
+  #     if not color in colors:
+  #       colors.append(color)
+  #   return colors
 
-  def loadRandomLevel(self, requirements = {}):
-    maxStacks = requirements['maxStacks'] if 'maxStacks' in requirements else 6
-    maxStacks = self._maxStacks if maxStacks > self._maxStacks else maxStacks
-    minBoxes = requirements['minBoxes'] if 'minBoxes' in requirements else 1
-    maxBoxes = requirements['maxBoxes'] if 'maxBoxes' in requirements else 3
-    maxBoxes = self._maxLayers if maxBoxes > self._maxLayers else maxBoxes
-    requiredColors = requirements['requiredColors'] if 'requiredColors' in requirements else []
-    levelName = requirements['levelName'] if 'levelName' in requirements else 'random level'
-    maxColors = requirements['maxColors'] if 'maxColors' in requirements else 4
-    startStacks = requirements['startStacks'] if 'startStacks' in requirements else []
-    endStacks = requirements['endStacks'] if 'endStacks' in requirements else []
+  # def loadRandomLevel(self, requirements = {}):
+  #   maxStacks = requirements['maxStacks'] if 'maxStacks' in requirements else 6
+  #   maxStacks = self._maxStacks if maxStacks > self._maxStacks else maxStacks
+  #   minBoxes = requirements['minBoxes'] if 'minBoxes' in requirements else 1
+  #   maxBoxes = requirements['maxBoxes'] if 'maxBoxes' in requirements else 3
+  #   maxBoxes = self._maxLayers if maxBoxes > self._maxLayers else maxBoxes
+  #   requiredColors = requirements['requiredColors'] if 'requiredColors' in requirements else []
+  #   levelName = requirements['levelName'] if 'levelName' in requirements else 'random level'
+  #   maxColors = requirements['maxColors'] if 'maxColors' in requirements else 4
+  #   startStacks = requirements['startStacks'] if 'startStacks' in requirements else []
+  #   endStacks = requirements['endStacks'] if 'endStacks' in requirements else []
 
-    colors = self._randomColors(requiredColors, maxColors)
-    myYard = self._createRandomYard(maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors, startStacks, endStacks)
-    self.loadMyLevel(myYard, levelName)
-    self._knownEmpty = [True for stack in range(self._maxStacks)]
-    if minBoxes != maxBoxes:
-      for stack in range(len(startStacks), len(startStacks) + maxStacks):
-        self._knownEmpty[stack] = False
+  #   colors = self._randomColors(requiredColors, maxColors)
+  #   myYard = self._createRandomYard(maxStacks, minBoxes, maxBoxes, colors, maxColors, requiredColors, startStacks, endStacks)
+  #   self.loadMyLevel(myYard, levelName)
+  #   self._knownEmpty = [True for stack in range(self._maxStacks)]
+  #   if minBoxes != maxBoxes:
+  #     for stack in range(len(startStacks), len(startStacks) + maxStacks):
+  #       self._knownEmpty[stack] = False
 
-  def randomLevel(self, stacks, layers):
-    self.loadRandomLevel({'maxStacks': stacks, 'maxBoxes': layers})
+  # def randomLevel(self, stacks, layers):
+  #   self.loadRandomLevel({'maxStacks': stacks, 'maxBoxes': layers})
 
-  def inspectYard(self):
-    print(self._yard)
+  def serializeYard(self):
+    _yard = ''
+    for stack in self._yard:
+      _yard += ''.join(stack)+','
+    return _yard
 
 ########### EVENT HANDLING ###########
 
@@ -549,13 +750,18 @@ class RobotArm:
           if instruction.key == pygame.K_RIGHT:
             self.moveRight()
           if instruction.key == pygame.K_DOWN:
-            if self.scan() == '':
+            if self._color == '':
               self.grab()
             else:
               self.drop()
 
   def operate(self):
     self.wait(self._operator)
+
+  def help(self):
+    print('help')
+
+  
 
 if __name__ == "__main__":
   print('tested module RobotArm')
