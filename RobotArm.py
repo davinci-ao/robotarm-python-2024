@@ -83,6 +83,7 @@ class RobotArm:
   _speeds = [{'fps': 100,'step': 1},{'fps': 150,'step': 2},{'fps': 250,'step': 4},{'fps': 400,'step': 5},{'fps': 500,'step': 10},{'fps': 500,'step': 20}]
   EMPTY = ''
   _backgroundColor = (200,200,200)
+  _backgroundColorAccu = (0,0,0)
   _penColor = (0,0,0)
   _maxStacks = 10
   _maxLayers = 7
@@ -101,22 +102,13 @@ class RobotArm:
   _hazardSprite = 'caution-icon-hi.png'
   _hazardFont = 'FreeSansBold.ttf'
   _previousAction = ''
-  
-  _STATE_NOT_STARTED = 0
-  _STATE_STARTED = 1
-  _STATE_BUSY = 2
-  _STATE_SOLVED = 3
-  _STATE_SUCCEEDED = 4
-  _STATE_FAILED = 5
-  _STATE_CANCELED = 6
-  _STATE_OVERRULED = 7
-  _STATE_ABORTED = 8
-
-  _missionState = _STATE_NOT_STARTED
   _accuWidth = 15
   _accuCapacity = False
   _accuPadding = 5
   _accuColors = ((100,'g'),(50, 'y'),(25, 'o'),(10, 'r'))
+  _criticals = {'e':0,'w':0,'i':0}
+  _solutionDone = False
+  _aborted = False
   _actionFlaws = [
     ['left','right'],
     ['right','left'],
@@ -293,7 +285,7 @@ class RobotArm:
     _accuDone = _stepsDone / self._accuCapacity
     _accuPerc = ceil(_accuOver * 100)
 
-    pygame.draw.rect(self._screen, (0,0,0), (self._screenWidth, 0, self._accuWidth, self._screenHeight))
+    pygame.draw.rect(self._screen, self._backgroundColorAccu, (self._screenWidth, 0, self._accuWidth, self._screenHeight))
     _x0 = self._screenWidth + self._accuPadding
     _y0 = 0 + self._accuPadding
     _w0 = self._accuWidth - 2 * self._accuPadding
@@ -335,8 +327,16 @@ class RobotArm:
     self._drawState()
     pygame.display.update()
 
-  def _animateHazard(self, message = 'problem!'):
+  def _handleHazard(self, message = 'problem!'):
     self._message(message, 1)
+    self._log(message,'e')
+
+  def _log(self, message, cat):
+    if self._level in [0,1] and cat == 'w': return
+    markup = {'w':{'title':'warning','color':'orange'},'i':{'title':'info   ','color':'white'},'e': {'title':'error  ','color':'red'}}
+    title = self._colored(markup[cat]['title'],markup[cat]['color'])
+    print(f'{title}: {message}')
+    self._criticals[cat] += 1
 
   def _animate(self, *args):
     self._checkSpeed()
@@ -395,63 +395,58 @@ class RobotArm:
   def _hasActionsLeft(self):
     return self._accuCapacity == False or (self._accuCapacity - self._actions) > 0
 
-  def _canDoAction(self)->bool:
-    if self._missionState > self._STATE_SUCCEEDED: return
-    if self._missionState == self._STATE_SOLVED:
-        self._missionInfo('FAILED', f'Solution already reached...', 'but still actions planned','red')
+  def _checkAccu(self):
+    if not self._hasActionsLeft():
+      if self._accuEmpty:
+        self._wait(self._continue)
+      if self._accuEmpty == False: 
+        self._log('accu empty, use spacebar to proceed, escape to abort','w')
+        self._backgroundColorAccu = (255,0,0)
         self._accuEmpty = True
-        self._missionState = self._STATE_FAILED
+      self._log('action, no energie','w')
+    self._actions += 1
 
-    if self._hasActionsLeft():
-      self._actions += 1
-      self._missionState = self._STATE_BUSY
-      return True
-    
-    if self._accuEmpty == False and self._missionState == self._STATE_BUSY:
-        self._missionInfo('FAILED', f'Solution not reached in {self._accuCapacity}', 'accu empty','red')
-        self._accuEmpty = True
-        self._missionState = self._STATE_FAILED
-
-    sys.stdout.write('.')
-    sys.stdout.flush()
-    return False
-
-  def _efficiencyCheck(self, action):
+  def _checkFlaws(self, action):
     if self._level == 0: return
     for flaw in self._actionFlaws:
       if (self._previousAction == flaw[0] and action == flaw[1]):
         flawText = f'{flaw[1]} after {flaw[0]}? why?'
-        print(self._colored(f'action flaw: {flawText}','orange'))
+        self._log(f'action flaw: {flawText}','w')
     self._previousAction = action
+    if self._solutionDone:
+      self._log(f'pointless action after solution','w')
 
   ########### ROBOTARM MANIPULATION ###########
   def moveRight(self):
-    if not self._canDoAction(): return
-    self._efficiencyCheck('right')
+    if self._aborted: return
+    self._checkAccu()
+    self._checkFlaws('right')
     success = False
     if self._stack < self._maxStacks - 1:
       self._animate('right')
       self._stack += 1
       success = True
     else:
-      self._animateHazard('hit right border!')
+      self._handleHazard('hit right border!')
     return success
 
   def moveLeft(self):
-    if not self._canDoAction(): return
-    self._efficiencyCheck('left')
+    if self._aborted: return
+    self._checkAccu()
+    self._checkFlaws('left')
     success = False
     if self._stack > 0:
       self._animate('left')
       self._stack -= 1
       success = True
     else:
-      self._animateHazard('hit left border!')
+      self._handleHazard('hit left border!')
     return success
 
   def grab(self):
-    if not self._canDoAction(): return
-    self._efficiencyCheck('grab')
+    if self._aborted: return
+    self._checkAccu()
+    self._checkFlaws('grab')
     success = False
     if self._color == self.EMPTY:
       self._animate('down')
@@ -461,17 +456,18 @@ class RobotArm:
         success = True
       else:
         if self._knownEmpty[self._stack]:
-          self._animateHazard('nothing to grab!')
+          self._handleHazard('nothing to grab!')
         else:
           self._knownEmpty[self._stack] = True
       self._animate('up')
     else:
-      self._animateHazard('robot arm occupied!')
+      self._handleHazard('robot arm occupied!')
     return success
 
   def drop(self):
-    if not self._canDoAction(): return
-    self._efficiencyCheck('drop')
+    if self._aborted: return
+    self._checkAccu()
+    self._checkFlaws('drop')
     success = False
     if self._color != self.EMPTY:
       if len(self._yard[self._stack]) < self._maxLayers:
@@ -481,15 +477,16 @@ class RobotArm:
         self._animate('up')
         success = True
       else:
-        self._animateHazard('stack full!')
+        self._handleHazard('stack full!')
     else:
-      self._animateHazard('no box to drop!')
+      self._handleHazard('no box to drop!')
     self._watchSolution()
     return success
 
   def scan(self):
-    if not self._canDoAction(): return
-    self._efficiencyCheck('scan')
+    if self._aborted: return
+    self._checkAccu()
+    self._checkFlaws('scan')
     return self._color
   
   def stackEmpty(self):
@@ -509,29 +506,11 @@ class RobotArm:
       return self._solution(self._yardStart, serializedYard, self._criteria)
     
   def _watchSolution(self):
-    # print(f'watch {self._missionState} {self._isSolution()}')
-    if self._missionState == self._STATE_BUSY and self._isSolution():
-      title = 'ACCOMPLISHED'
+    if self._isSolution():
       self._backgroundColor = (250,250,100)
+      self._solutionDone = True
       self._animate('idle')
-      color = 'green'
-      if self._level >= 2:
-        title = 'ALMOST ' + title
-        self._missionState = self._STATE_SOLVED
-        color = 'orange'
-      else:
-        self._missionState = self._STATE_SUCCEEDED
-      self._missionInfo(title, f'Solution reached in {self._actions} actions','Congrats!',color)
       
-  def _checkLimitLines(self):
-    lines = self._count_lines_of_code()
-    print(f'using {lines} lines of code')
-    if self._level == 0 or self._limitLines == False: return
-    exceeded = lines - self._limitLines
-    if exceeded > 0 and self._missionState == self._STATE_STARTED:
-      self._missionInfo('FAILED', f'Progam contains: {lines:3} lines of code',f'Maximum allowed lines of:{self._limitLines:3} has been exceeded!','red')
-      self._missionState = self._STATE_FAILED
-
   def constructYard(self, yard = 'r', symbols = '' ):
     colorSymbols = string.ascii_lowercase + '?'
     amountSymbols = string.ascii_uppercase + '*'
@@ -636,15 +615,15 @@ class RobotArm:
     return solution
   
   def _displayMission(self):
-    info1 = 'No restrictions on number of lines of code'
-    info2 = 'No restrictions on number of actions taken'
+    info1 = 'No restrictions on lines of code'
+    info2 = 'No restrictions on actions taken, but no errors allowed!'
     if self._level in [1,2,3] and self._limitLines != False:
       info1 = f'Maximum number of lines of code: {self._limitLines}'
     if self._level in [2,3] and self._limitActions != False:
-        info2 = f'Maximum number of actions: {self._limitActions}'
+        info2 = f'Maximum number of actions: {self._limitActions}, no errors or warnings!'
     _missionText = 'WITH UNKNOWN SOLUTION' if self._solution == False else f'AT LEVEL: {self._level}'
     self._missionInfo(f'STARTED {_missionText} ', info1, info2,'yellow')
-    self._missionState = self._STATE_STARTED
+    self._log(f'Started with {self._lines} lines of code','i')
 
   def load(self, challenge = _defaultChallenge , level =  0):
     _symbols = ''
@@ -670,13 +649,13 @@ class RobotArm:
     self._yardStart = self.serializeYard(self._yard)
     self._solution = self.setSolution(_solution)
     self._criteria = _criteria
-    self._solutionReached = False
+    self._solutionDone = False
    
     if _levels != False: 
       while level > 0 and not str(level)+':' in _levels: level -= 1
     self._level = level
     self._limitLines, self._limitActions = self.setLevelLimits(level, _levels)
-
+    self._lines = self._count_lines_of_code()
     self._actions = 0
     self._challengeName =_challengeName
     self._mission = False
@@ -684,8 +663,6 @@ class RobotArm:
     self._accuCapacity = self._limitActions
     self._accuEmpty = False
     self._displayMission()
-    self._checkLimitLines()
-
     self._animate('idle')
 
     return True
@@ -715,19 +692,23 @@ class RobotArm:
     for event in events:
       self.checkCloseEvent(event)
 
-  def wait(self, handler = False):
-    if self._missionState == self._STATE_BUSY:
-      self._missionInfo('CANCELED', f'Solution not reached after {self._actions} actions', 'Robot arm is now waiting','red')
-      self._missionState = 5
-    elif self._level >= 2 and self._missionState == self._STATE_SOLVED:
-      self._missionInfo('ACCOMPLISHED', f'Solution reached in {self._actions} actions','Congrats!','green')
-      self._missionState = self._STATE_SUCCEEDED
+  def _continue(self, events):
+    for event in events:
+      if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_SPACE:
+          return False
+        elif event.key == pygame.K_ESCAPE:
+          self._aborted = True
+          return False
+    return True
 
+  def _wait(self, handler = False):
     cycle = 0
     while True:
       events = pygame.event.get()               # get latest events
       if callable(handler):
-        handler(events)
+        if not handler(events):
+          break
       self._defaultHandler(events)
       if len(events) > 0:                       # events happened?
         cycle = 0                               # stay awake and alert
@@ -736,6 +717,8 @@ class RobotArm:
       if cycle > self._eventActiveCycles:       # after 30 cycles
         pygame.time.delay(self._eventSleepTime) # go asleep for 300 milliseconds, give the processor some rest
         cycle = 0                               # wake up for events during sleep
+
+
   def _operator(self, instructions):
     for instruction in instructions:
       if instruction.type == pygame.KEYDOWN:
@@ -748,13 +731,41 @@ class RobotArm:
               self.grab()
             else:
               self.drop()
+    return True # continue listening
 
   def operate(self):
-    if self._missionState == self._STATE_BUSY:
-      self._missionInfo('OVERRULED', f'Solution not reached after {self._actions} actions', 'Robot arm is now operated manually','red')
-      self._missionState = self._STATE_OVERRULED
-    self.wait(self._operator)
+
+    self._wait(self._operator)
       
+  def wait(self):
+    if self._solution != False:
+      fails = []
+      if self._criticals['e'] > 0:
+        fails.append('errors encountered')
+      if not self._solutionDone:
+        fails.append('solution not reached')
+      if self._level > 0 and self._limitLines != False and self._lines > self._limitLines:
+        fails.append('too many code lines')
+      if self._level > 1 and self._limitActions != False and self._actions > self._limitActions:
+        fails.append('too many actions')
+      if self._level > 1 and self._criticals['w'] > 0:
+        fails.append('warnings given')
+      if fails:
+        sup = ' AND ABORTED' if self._aborted else ''
+        info1 = 'Mission not yet accomplished. Lets work on it!'
+        info2 = 'Reasons: ' + ', '.join(fails)
+        self._missionInfo(f'FAILED'+sup, info1, info2,'red')
+      else:
+        info1 = 'Mission accomplished. Congrats!'
+        if self._level == 2:
+          info2 = 'Try another challenge!'
+        else:
+          info2 = 'Try a higher level!'
+        self._missionInfo(f'ACCOMPLISHED', info1, info2,'green')    
+    else:
+      self._missionInfo(f'UNDECIDED', 'No solution defined', 'Try define a solution with levels','white')  
+      pass   
+    self._wait()
 
   def help(self):
     print('help')
@@ -772,8 +783,6 @@ class RobotArm:
       self._animate('idle')
       print(self._colored('Solution example displayed','yellow'))
       input('Press enter to resume...')
-      self._missionInfo('ABORTED','Solution displayed', 'remove line: _showSolution()','yellow')
-      self._missionState = self._STATE_ABORTED
 
 if __name__ == "__main__":
   print('tested module RobotArm')
