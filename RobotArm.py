@@ -101,7 +101,18 @@ class RobotArm:
   _hazardSprite = 'caution-icon-hi.png'
   _hazardFont = 'FreeSansBold.ttf'
   _previousAction = ''
-  _missionState = 0 # 0 not started; 1: started; 2: succeeded; 3: failed; 4: canceled; 5: overruled
+  
+  _STATE_NOT_STARTED = 0
+  _STATE_STARTED = 1
+  _STATE_BUSY = 2
+  _STATE_SOLVED = 3
+  _STATE_SUCCEEDED = 4
+  _STATE_FAILED = 5
+  _STATE_CANCELED = 6
+  _STATE_OVERRULED = 7
+  _STATE_ABORTED = 8
+
+  _missionState = _STATE_NOT_STARTED
   _accuWidth = 15
   _accuCapacity = False
   _accuPadding = 5
@@ -385,14 +396,21 @@ class RobotArm:
     return self._accuCapacity == False or (self._accuCapacity - self._actions) > 0
 
   def _canDoAction(self)->bool:
+    if self._missionState > self._STATE_SUCCEEDED: return
+    if self._missionState == self._STATE_SOLVED:
+        self._missionInfo('FAILED', f'Solution already reached...', 'but still actions planned','red')
+        self._accuEmpty = True
+        self._missionState = self._STATE_FAILED
+
     if self._hasActionsLeft():
       self._actions += 1
-      return True    
-
-    if self._accuEmpty == False and self._missionState == 1:
+      self._missionState = self._STATE_BUSY
+      return True
+    
+    if self._accuEmpty == False and self._missionState == self._STATE_BUSY:
         self._missionInfo('FAILED', f'Solution not reached in {self._accuCapacity}', 'accu empty','red')
         self._accuEmpty = True
-        self._missionState = 3
+        self._missionState = self._STATE_FAILED
 
     sys.stdout.write('.')
     sys.stdout.flush()
@@ -480,7 +498,8 @@ class RobotArm:
 ########### LEVEL & YARD lOADING & CREATION ###########
 
   def _isSolution(self):
-    serializedYard = self.serializeYard()
+    serializedYard = self.serializeYard(self._yard)
+    
     if type(self._solution) is str:
       if self._solution == serializedYard:
         return True
@@ -490,18 +509,28 @@ class RobotArm:
       return self._solution(self._yardStart, serializedYard, self._criteria)
     
   def _watchSolution(self):
-    if self._missionState == 1 and self._isSolution():
-      self._missionInfo('ACCOMPLISHED', f'Solution reached in {self._actions} actions','Congrats!','green')
-      self._missionState = 2
+    # print(f'watch {self._missionState} {self._isSolution()}')
+    if self._missionState == self._STATE_BUSY and self._isSolution():
+      title = 'ACCOMPLISHED'
+      self._backgroundColor = (250,250,100)
+      self._animate('idle')
+      color = 'green'
+      if self._level >= 2:
+        title = 'ALMOST ' + title
+        self._missionState = self._STATE_SOLVED
+        color = 'orange'
+      else:
+        self._missionState = self._STATE_SUCCEEDED
+      self._missionInfo(title, f'Solution reached in {self._actions} actions','Congrats!',color)
       
   def _checkLimitLines(self):
     lines = self._count_lines_of_code()
-    print(f'lines of code: {lines}')
-    if self._level == 0: return
+    print(f'using {lines} lines of code')
+    if self._level == 0 or self._limitLines == False: return
     exceeded = lines - self._limitLines
-    if exceeded > 0 and self._missionState == 1:
+    if exceeded > 0 and self._missionState == self._STATE_STARTED:
       self._missionInfo('FAILED', f'Progam contains: {lines:3} lines of code',f'Maximum allowed lines of:{self._limitLines:3} has been exceeded!','red')
-      self._missionState = 3
+      self._missionState = self._STATE_FAILED
 
   def constructYard(self, yard = 'r', symbols = '' ):
     colorSymbols = string.ascii_lowercase + '?'
@@ -602,6 +631,8 @@ class RobotArm:
   def setSolution(self, solution):
     if type(solution) is str:
       solution += (self._maxStacks - solution.count(',') - 1) * ','
+      _yardSolution = self.constructYard(solution,'')
+      solution = self.serializeYard(_yardSolution)
     return solution
   
   def _displayMission(self):
@@ -613,7 +644,7 @@ class RobotArm:
         info2 = f'Maximum number of actions: {self._limitActions}'
     _missionText = 'WITH UNKNOWN SOLUTION' if self._solution == False else f'AT LEVEL: {self._level}'
     self._missionInfo(f'STARTED {_missionText} ', info1, info2,'yellow')
-    self._missionState = 1
+    self._missionState = self._STATE_STARTED
 
   def load(self, challenge = _defaultChallenge , level =  0):
     _symbols = ''
@@ -636,7 +667,7 @@ class RobotArm:
       return False
 
     self._yard = self.constructYard(_yard, _symbols)
-    self._yardStart = self.serializeYard()
+    self._yardStart = self.serializeYard(self._yard)
     self._solution = self.setSolution(_solution)
     self._criteria = _criteria
     self._solutionReached = False
@@ -645,6 +676,7 @@ class RobotArm:
       while level > 0 and not str(level)+':' in _levels: level -= 1
     self._level = level
     self._limitLines, self._limitActions = self.setLevelLimits(level, _levels)
+
     self._actions = 0
     self._challengeName =_challengeName
     self._mission = False
@@ -658,9 +690,9 @@ class RobotArm:
 
     return True
 
-  def serializeYard(self):
+  def serializeYard(self, yard):
     _yard = ''
-    for stack in self._yard:
+    for stack in yard:
       _yard += ''.join(stack)+','
     return _yard[:-1]
 
@@ -684,9 +716,12 @@ class RobotArm:
       self.checkCloseEvent(event)
 
   def wait(self, handler = False):
-    if self._missionState == 1:
+    if self._missionState == self._STATE_BUSY:
       self._missionInfo('CANCELED', f'Solution not reached after {self._actions} actions', 'Robot arm is now waiting','red')
-      self._missionState = 4
+      self._missionState = 5
+    elif self._level >= 2 and self._missionState == self._STATE_SOLVED:
+      self._missionInfo('ACCOMPLISHED', f'Solution reached in {self._actions} actions','Congrats!','green')
+      self._missionState = self._STATE_SUCCEEDED
 
     cycle = 0
     while True:
@@ -715,9 +750,9 @@ class RobotArm:
               self.drop()
 
   def operate(self):
-    if self._missionState == 1:
+    if self._missionState == self._STATE_BUSY:
       self._missionInfo('OVERRULED', f'Solution not reached after {self._actions} actions', 'Robot arm is now operated manually','red')
-      self._missionState = 5
+      self._missionState = self._STATE_OVERRULED
     self.wait(self._operator)
       
 
@@ -733,13 +768,12 @@ class RobotArm:
 
   def _showSolution(self):
     if type(self._solution) == str:
-      yardSerial = self.serializeYard()
       self._yard = self._reconstructYard(self._solution)
       self._animate('idle')
       print(self._colored('Solution example displayed','yellow'))
       input('Press enter to resume...')
-      self._yard = self._reconstructYard(yardSerial)
-      pass
+      self._missionInfo('ABORTED','Solution displayed', 'remove line: _showSolution()','yellow')
+      self._missionState = self._STATE_ABORTED
 
 if __name__ == "__main__":
   print('tested module RobotArm')
