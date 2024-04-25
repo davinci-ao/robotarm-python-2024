@@ -8,18 +8,18 @@ import inspect
 from math import ceil, floor
 
 # RobotArm class ################################################
-#
-'''
+help = '''
   An object of this class...
 
   lets you load and display a yard with stacks of colored boxes
-  you can load a predefined level at the creation
+  you can load a predefined challenge at the creation
   lets you program the movement of boxes and scan their colors
   lets you inspect the yard for debugging purposes
 
-  supported colors are: white, green, red, blue, yellow, orange, purple and no (black)
+  supported colors are: white, green, red, blue, yellow, orange, purple and nocolor
 
-methods for public use:
+  methods to use: 
+
   moveRight()
     moves the robotarm one stack position to the right
     returns True if succeeded, returns False if not possible
@@ -37,7 +37,13 @@ methods for public use:
     returns True if succeeded, returns False if not possible
 
   scan()
-     returns the color of the box at the robotarm
+    returns the color of the box at the robotarm
+
+  stackEmpty()
+    returns true if stack under robotarm ie empty
+
+  showSolution()
+    displays the solution if available
 
   wait(operator)
       waits for the the program window to be closed
@@ -49,15 +55,10 @@ methods for public use:
 
 creating and loading challenges
 
-  loadLevel(levelName)
-    loads a predefined level for levelName {string}
+  load(challenge)
+    loads a challenge for example: {'name': 'collect boxes', 'yard' : 'b,,,,b,,,b' , 'solution': ',,,,,,,,,bbb', 'levels':'2:20,3:20/29' }
+    loads a yard without challenge: '3r,2r,b,b'
     returns True if succeeded, returns False if failed
-
-  loadMyLevel(yard, levelName)
-    loads a self made yard with a self made levelName {string}
-    where yard is a list of stacks each stack is a list of colors
-      box colors example of a yard: [['r','g'],['r','b'],[],['g']]
-    returns True if succeeded, returns False if errors found, but sanitized
 '''
 
 class RobotArm:
@@ -773,8 +774,9 @@ class RobotArm:
     self._reportMission()
     self._wait()
 
-  def help(self):
-    print('help')
+  @staticmethod
+  def help():
+    print(help)
 
   def _reconstructYard(self,yard):
     _yard = []
@@ -783,27 +785,15 @@ class RobotArm:
       _yard.append(list(stack))
     return _yard
 
-  def _showSolution(self):
+  def showSolution(self):
     if type(self._solution) == str:
       self._yard = self._reconstructYard(self._solution)
       self._animate('idle')
       print(self._colored('Solution example displayed','yellow'))
-      input('Press enter to resume...')
+      self._aborted = True
+
 
 if __name__ == "__main__":
   print('tested module RobotArm')
-
-# visual errors
-# hit border or floor
-
-# warning
-# pointless action
-# action after reached solution
-# accu empty
-# attempted action after empty accu
-
-# info
-# reached solution
-# 
 
 
