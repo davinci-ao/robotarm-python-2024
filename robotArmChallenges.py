@@ -7,7 +7,7 @@ challenges = {
     4:  {'name':'move all boxes to right','yard' : 'r,b,w,g,g,b,r,w', 'symbols':'','solution': ',r,b,w,g,g,b,r,w'},
     5:  {'name':'split stack in two colors','yard' : ',rwrwrw', 'symbols':'','solution': 'www,,rrr'},
     6:  {'name':'move all stacks to left','yard' : ',6b,,6b,,6b,,6b,,6b', 'symbols':'','solution': '6b,,6b,,6b,,6b,,6b'},
-    7:  {'name':'move stack to end','yard' : ',7r', 'symbols':'','solution2': ',,,,,,,,,7r','levels':'1:14,2:25/119'},
+    7:  {'name':'move stack to end','yard' : ',7r', 'symbols':'','solution': ',,,,,,,,,7r','levels':'1:14,2:25/119'},
     8:  {'name':'move all stacks','yard' : 'b,gg,www,rrrr', 'symbols':'','solution': ',,,,,b,gg,www,rrrr'},
     9:  {'name':'flip all boxes over','yard' : 'g,b,w,r,b', 'symbols':'','solution': ',,,,,b,r,w,b,g'},
     10: {'name':'whites to the right','yard' : 'x,x,x,x,x,x,x,x,x,', 'symbols': 'x-wwwwrgbyrgby', 'solution': hasSolution,'criteria':'w>1'},
