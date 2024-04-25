@@ -108,6 +108,7 @@ class RobotArm:
   _accuColors = ((100,'g'),(50, 'y'),(25, 'o'),(10, 'r'))
   _criticals = {'e':0,'w':0,'i':0}
   _solutionDone = False
+  _missionReported = False
   _aborted = False
   _actionFlaws = [
     ['left','right'],
@@ -136,9 +137,6 @@ class RobotArm:
   def _internalError(self, info):
     print(f' ********* {info} *********')
     exit()
-
-  def _warning(self,info):
-    pass
 
   def _colored(self,text,color):
     if color == 'red':
@@ -182,7 +180,7 @@ class RobotArm:
     self._screenHeight = self._layerY(-1) + self._bottomMargin + 2 * self._screenMargin
     self._screen = pygame.display.set_mode((self._screenWidth + self._accuWidth, self._screenHeight))
 
-  def __init__(self, challenge = _defaultChallenge, level = -1):
+  def __init__(self, challenge = _defaultChallenge, level = 0):
     self._color = self.EMPTY
     self._stack = 0
     self._yardBottom = self._armTopHeight + (self._maxLayers + 1) * self._boxSpaceHeight() + self._penWidth
@@ -329,10 +327,11 @@ class RobotArm:
 
   def _handleHazard(self, message = 'problem!'):
     self._message(message, 1)
-    if self._level != -1: self._log(message,'e')
+    self._log(message,'e')
 
   def _log(self, message, cat):
-    if self._level in [-1,0,1] and cat == 'w': return
+    if self._level in [0] and cat == 'e': return
+    if self._level in [0,1,2] and cat == 'w': return
     markup = {'w':{'title':'warning','color':'orange'},'i':{'title':'info   ','color':'white'},'e': {'title':'error  ','color':'red'}}
     title = self._colored(markup[cat]['title'],markup[cat]['color'])
     print(f'{title}: {message}')
@@ -403,18 +402,17 @@ class RobotArm:
         self._log('accu empty, use spacebar to proceed, escape to abort','w')
         self._backgroundColorAccu = (255,0,0)
         self._accuEmpty = True
-      self._log('action, no energie','w')
+      self._log('action, but accu empty','w')
     self._actions += 1
 
   def _checkFlaws(self, action):
-    if self._level in [-1,0]: return
     for flaw in self._actionFlaws:
       if (self._previousAction == flaw[0] and action == flaw[1]):
-        flawText = f'{flaw[1]} after {flaw[0]}? why?'
-        self._log(f'action flaw: {flawText}','w')
+        flawText = f'{flaw[1]} after {flaw[0]}'
+        self._log(f'action pointless: {flawText}?','w')
     self._previousAction = action
     if self._solutionDone:
-      self._log(f'pointless action after solution','w')
+      self._log(f'action after solution','w')
 
   ########### ROBOTARM MANIPULATION ###########
   def moveRight(self):
@@ -616,18 +614,18 @@ class RobotArm:
   
   def _displayMission(self):
     
-    if self._level == -1: return
+    if self._level == 0: return
     info1 = 'No restrictions on lines of code'
     info2 = 'No restrictions on actions taken, but no errors allowed!'
     if self._level in [1,2,3] and self._limitLines != False:
       info1 = f'Maximum number of lines of code: {self._limitLines}'
-    if self._level in [2,3] and self._limitActions != False:
+    if self._level in [3] and self._limitActions != False:
         info2 = f'Maximum number of actions: {self._limitActions}, no errors or warnings!'
     _missionText = 'WITH UNKNOWN SOLUTION' if self._solution == False else f'AT LEVEL: {self._level}'
     self._missionInfo(f'STARTED {_missionText} ', info1, info2,'yellow')
     self._log(f'Started with {self._lines} lines of code','i')
 
-  def load(self, challenge = _defaultChallenge , level =  -1):
+  def load(self, challenge = _defaultChallenge , level = 0):
     _symbols = ''
     _solution = False
     _levels = False 
@@ -641,7 +639,7 @@ class RobotArm:
       _levels = challenge.get('levels',False)
       _challengeName = challenge.get('name','no name')
     elif type(challenge) is str:
-      level = -1
+      level = 0
       _yard = challenge
       _challengeName = 'no name'
     else:
@@ -654,7 +652,7 @@ class RobotArm:
     self._solutionDone = False
 
     if _levels != False:
-      while level > 0 and not str(level)+':' in _levels: level -= 1
+      while level > 1 and not str(level)+':' in _levels: level -= 1
     self._level = level
    
     self._limitLines, self._limitActions = self.setLevelLimits(level, _levels)
@@ -736,40 +734,43 @@ class RobotArm:
     return True # continue listening
 
   def operate(self):
-
+    self._reportMission()
     self._wait(self._operator)
+
+  def _reportMission(self):
+    if self._level == 0 or self._missionReported : return
+    self._missionReported = True
+    if self._solution == False:
+      self._missionInfo(f'UNDECIDED', 'No solution defined', 'Try define a solution with levels','white')  
+    elif self._actions == 0:
+      self._missionInfo(f'NOT STARTED', 'Start thinking and coding', 'start at level 0','white')  
+    else:
+      fails = []
+      if self._criticals['e'] > 0:
+        fails.append('errors encountered')
+      if not self._solutionDone:
+        fails.append('solution not reached')
+      if self._level > 0 and self._limitLines != False and self._lines > self._limitLines:
+        fails.append('too many code lines')
+      if self._level > 2 and self._limitActions != False and self._actions > self._limitActions:
+        fails.append('too many actions')
+      if self._level > 2 and self._criticals['w'] > 0:
+        fails.append('warnings given')
+      if fails:
+        sup = ' AND ABORTED' if self._aborted else ''
+        info1 = 'Mission not yet accomplished. Lets work on it!'
+        info2 = 'because: ' + ', '.join(fails)
+        self._missionInfo(f'FAILED'+sup, info1, info2,'red')
+      else:
+        info1 = 'Mission accomplished. Congrats!'
+        if self._level == 3:
+          info2 = 'Try another challenge!'
+        else:
+          info2 = 'Try a higher level!'
+        self._missionInfo(f'ACCOMPLISHED', info1, info2,'green')    
       
   def wait(self):
-    if self._level != -1:
-      if self._solution == False:
-        self._missionInfo(f'UNDECIDED', 'No solution defined', 'Try define a solution with levels','white')  
-      elif self._actions == 0:
-        self._missionInfo(f'NOT STARTED', 'Start thinking and coding', 'start at level 0','white')  
-      else:
-        fails = []
-        if self._criticals['e'] > 0:
-          fails.append('errors encountered')
-        if not self._solutionDone:
-          fails.append('solution not reached')
-        if self._level > 0 and self._limitLines != False and self._lines > self._limitLines:
-          fails.append('too many code lines')
-        if self._level > 1 and self._limitActions != False and self._actions > self._limitActions:
-          fails.append('too many actions')
-        if self._level > 1 and self._criticals['w'] > 0:
-          fails.append('warnings given')
-        if fails:
-          sup = ' AND ABORTED' if self._aborted else ''
-          info1 = 'Mission not yet accomplished. Lets work on it!'
-          info2 = 'Reasons: ' + ', '.join(fails)
-          self._missionInfo(f'FAILED'+sup, info1, info2,'red')
-        else:
-          info1 = 'Mission accomplished. Congrats!'
-          if self._level == 2:
-            info2 = 'Try another challenge!'
-          else:
-            info2 = 'Try a higher level!'
-          self._missionInfo(f'ACCOMPLISHED', info1, info2,'green')    
-
+    self._reportMission()
     self._wait()
 
   def help(self):

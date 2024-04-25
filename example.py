@@ -1,7 +1,10 @@
 from RobotArm import RobotArm
 from robotArmChallenges import challenges
 robotArm = RobotArm(challenges[7],1)
+
 # robotArm._showSolution()
+# robotArm.moveLeft()   
+
 robotArm.moveRight()
 for i in range(7):
     robotArm.grab()
