@@ -40,7 +40,7 @@ help = '''
     returns the color of the box at the robotarm
 
   stackEmpty()
-    returns true if stack under robotarm ie empty
+    returns True if stack under robotarm ie empty, else False
 
   showSolution()
     displays the solution if available
@@ -57,8 +57,32 @@ creating and loading challenges
 
   load(challenge)
     loads a challenge for example: {'name': 'collect boxes', 'yard' : 'b,,,,b,,,b' , 'solution': ',,,,,,,,,bbb', 'levels':'2:20,3:20/29' }
-    loads a yard without challenge: '3r,2r,b,b'
+    loads a yard without challenge for example: '3r,2r,b,b'
     returns True if succeeded, returns False if failed
+
+    defining yards and stacks
+
+    Yards are defined in a string with stacks separated by komma's
+    boxes in a stacks are defined by a lowercase letter defining its color. 
+    colors: b is blue; r is red; w is white, g is green, y is yellow, o is orange, p is purple, n is no-color, ? is a random color from w, r , g or b
+
+    for example:
+    ',r,bb,ggg' defines a yard with an empty stack, a stack with one red box, a stack with two blue boxes and a stack with three green boxes
+
+    digits before a color define the number of boxes of that color. * means a random number of boxes from 0, 1, 2, 3 or 4
+    for example:
+    '3r,,3w,,3b' defines a yard with a stack with 3 red boxes, en empty stack, a stack with 3 white boxes, an empty stack an a stack with 3 blue boxes
+
+
+
+
+
+
+
+
+    
+
+
 '''
 
 class RobotArm:
