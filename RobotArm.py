@@ -51,7 +51,7 @@ help = '''
       the operator must/can handle each event in events
 
   operate()
-      make the robotarm operate on keyboard-keys: LEFT, RIGHT and DOWN
+      makes the robotarm operate on keyboard-keys: LEFT, RIGHT and DOWN
 
 creating and loading challenges
 
@@ -72,16 +72,6 @@ creating and loading challenges
     digits before a color define the number of boxes of that color. * means a random number of boxes from 0, 1, 2, 3 or 4
     for example:
     '3r,,3w,,3b' defines a yard with a stack with 3 red boxes, en empty stack, a stack with 3 white boxes, an empty stack an a stack with 3 blue boxes
-
-
-
-
-
-
-
-
-    
-
 
 '''
 
@@ -327,7 +317,8 @@ class RobotArm:
 
   def _drawState(self):
     steps = ' ['+ str(self._actions)+']' if self._actions > 0 else ''
-    pygame.display.set_caption('Robotarm: ' + self._challengeName + steps)
+    _caption = self._challengeName[0:24] + steps
+    pygame.display.set_caption(_caption)
     self._screen.fill(self._backgroundColor)
     for c in range(len(self._yard)):
       self._drawStack(c)
@@ -657,7 +648,7 @@ class RobotArm:
     _criteria = False
 
     if type(challenge) is dict:
-      _yard = challenge.get('yard','')
+      _yard = challenge.get('start','')
       _symbols = challenge.get('symbols','')
       _solution = challenge.get('solution',False)
       _criteria = challenge.get('criteria',False)
