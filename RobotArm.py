@@ -72,7 +72,6 @@ creating and loading challenges
     digits before a color define the number of boxes of that color. * means a random number of boxes from 0, 1, 2, 3 or 4
     for example:
     '3r,,3w,,3b' defines a yard with a stack with 3 red boxes, en empty stack, a stack with 3 white boxes, an empty stack an a stack with 3 blue boxes
-
 '''
 
 class RobotArm:
@@ -82,26 +81,32 @@ class RobotArm:
 # 2.3: may grab once without warning from empty stack that was randomly sized
 # 2.3.1: added handling key UP en DOWN for speeding up and down, while running animations
 # 2.4: 
+  _backgroundColor = (200,200,200)
+  _transparentPenColor = list(_backgroundColor) # pencolor slightly different from background
+  for i in range(3): _transparentPenColor[i] += 20 if _transparentPenColor[i] <= 235 else -20
 
   _colors = [
-    {"name": 'w', 'code': (255,255,255), 'des': 'white'},
-    {"name": 'r', 'code': (255,0,0), 'des': 'red'},
-    {"name": 'g', 'code': (0,150,0), 'des': 'green'},
-    {"name": 'b', 'code': (0,0,255), 'des': 'blue'},
-    {"name": 'y', 'code': (255,255,0), 'des': 'yellow'},
-    {"name": 'p', 'code': (128,0,128), 'des': 'purple'},
-    {"name": 'o', 'code': (255,128,0), 'des': 'orange'},
-    {"name": 'n', 'code': (10,10,10), 'des': 'black'},
+    {"name": 'w', 'color': (255,255,255), 'des': 'white'},
+    {"name": 'r', 'color': (255,0,0), 'des': 'red'},
+    {"name": 'g', 'color': (0,150,0), 'des': 'green'},
+    {"name": 'b', 'color': (0,0,255), 'des': 'blue'},
+    {"name": 'y', 'color': (255,255,0), 'des': 'yellow'},
+    {"name": 'p', 'color': (128,0,128), 'des': 'purple'},
+    {"name": 'o', 'color': (255,128,0), 'des': 'orange'},
+    {"name": 'n', 'color': (10,10,10), 'des': 'black'},
+    {"name": 'i', 'color': _backgroundColor, 'des': 'invisible','pencolor':_backgroundColor}, # turns into tranaparent when grabbed
+    {"name": 't', 'color': _backgroundColor, 'des': 'transparent','pencolor':_transparentPenColor},
+    {"name": 'l', 'color': (160,160,160), 'des': 'gray'},
   ]
   _colorSet = [color['name'] for color in _colors]
-  _defaultChallenge = {'name': 'demo','yard' : ',r','solution': 'r', 'levels': '1:10,2:10/6'}
+  _defaultChallenge = {'name': 'demo','start' : ',r','solution': 'r', 'levels': '1:10,2:10/6'}
   _speeds = [{'fps': 100,'step': 1},{'fps': 150,'step': 2},{'fps': 250,'step': 4},{'fps': 400,'step': 5},{'fps': 500,'step': 10},{'fps': 500,'step': 20}]
   EMPTY = ''
-  _backgroundColor = (200,200,200)
+
   _backgroundColorAccu = (0,0,0)
   _penColor = (0,0,0)
   _maxStacks = 10
-  _maxLayers = 7
+  _maxLayers = 8
   _boxHeight = 29
   _boxWidth = 29
   _penWidth = 1
@@ -134,6 +139,7 @@ class RobotArm:
     ['drop','scan'],
   ]
   _knownEmpty = []
+  MAXCAPTION = 24
 
   def _count_lines_of_code(self):
     current_frame = inspect.currentframe()
@@ -195,7 +201,13 @@ class RobotArm:
     self._screenHeight = self._layerY(-1) + self._bottomMargin + 2 * self._screenMargin
     self._screen = pygame.display.set_mode((self._screenWidth + self._accuWidth, self._screenHeight))
 
+  def loadDims(self,challenge):
+    if not type(challenge) is dict: return
+    self._maxLayers = challenge.get('layers',self._maxLayers)
+    self._maxStacks = challenge.get('stacks',self._maxStacks)
+
   def __init__(self, challenge = _defaultChallenge, level = 0):
+    self.loadDims(challenge)
     self._color = self.EMPTY
     self._stack = 0
     self._yardBottom = self._armTopHeight + (self._maxLayers + 1) * self._boxSpaceHeight() + self._penWidth
@@ -236,8 +248,14 @@ class RobotArm:
   def _getColorCode(self, name):
     for c in self._colors:
       if c['name'] == name:
-        return c['code']
+        return c['color'], c.get('pencolor',self._penColor)
     return False
+  
+  def _getColorDes(self,name):
+    for c in self._colors:
+      if c['name'] == name:
+        return c['des']
+    return ''   
   
   def _checkSpeed(self):
     speedInvalid = False
@@ -249,9 +267,9 @@ class RobotArm:
       self.speed = 0 # reset speed to zero
       print('speed must be an integer between 0 and ' + str(len(self._speeds)-1))
 
-  def _drawBoxAtPosition(self, x, y, color):
+  def _drawBoxAtPosition(self, x, y, color, pencolor):
     pygame.draw.rect(self._screen, color, (x, y, self._boxWidth, self._boxHeight))
-    pygame.draw.rect(self._screen, self._penColor, (x, y, self._boxWidth, self._boxHeight), self._penWidth)
+    pygame.draw.rect(self._screen, pencolor, (x, y, self._boxWidth, self._boxHeight), self._penWidth)
 
   def _boxSpaceWidth(self):
     return (self._boxWidth + 2 * self._boxMargin) + self._penWidth
@@ -268,8 +286,8 @@ class RobotArm:
   def _drawBox(self, stack, layer):
     x = self._stackX(stack) 
     y = self._layerY(layer)
-    color = self._getColorCode(self._yard[stack][layer])
-    self._drawBoxAtPosition(x,y,color)
+    _color,_pencolor = self._getColorCode(self._yard[stack][layer])
+    self._drawBoxAtPosition(x,y,_color, _pencolor)
 
   def _drawStack(self, stack):
     for l in range(len(self._yard[stack])):
@@ -288,7 +306,8 @@ class RobotArm:
       (self._armX + self._boxWidth + self._penWidth,  self._armHeight - 2),
       (self._armX + self._boxWidth + self._penWidth , self._armHeight + 2)])
     if self._color > '':
-      self._drawBoxAtPosition(self._armX,self._armHeight,self._getColorCode(self._color))
+      _color, _pencolor = self._getColorCode(self._color)
+      self._drawBoxAtPosition(self._armX,self._armHeight,_color,_pencolor)
 
   def _drawAccu(self):
     if self._accuCapacity ==  False: return
@@ -311,13 +330,13 @@ class RobotArm:
     for percColor in self._accuColors:
       if _accuPerc < percColor[0]:
         color = percColor[1]
-  
-    pygame.draw.rect(self._screen, self._getColorCode(color), (_x0, _y, _w0, _h))
+    _color, _ = self._getColorCode(color)
+    pygame.draw.rect(self._screen, _color, (_x0, _y, _w0, _h))
     pass
 
   def _drawState(self):
     steps = ' ['+ str(self._actions)+']' if self._actions > 0 else ''
-    _caption = self._challengeName[0:24] + steps
+    _caption = self._challengeName[0:self.MAXCAPTION] + steps
     pygame.display.set_caption(_caption)
     self._screen.fill(self._backgroundColor)
     for c in range(len(self._yard)):
@@ -427,8 +446,8 @@ class RobotArm:
         flawText = f'{flaw[1]} after {flaw[0]}'
         self._log(f'action pointless: {flawText}?','w')
     self._previousAction = action
-    if self._solutionDone:
-      self._log(f'action after solution','w')
+    if self._solutionDone and self._scans > self._scansMax:
+      self._log(f'needless action after solution','w')
 
   ########### ROBOTARM MANIPULATION ###########
   def moveRight(self):
@@ -466,6 +485,8 @@ class RobotArm:
       self._animate('down')
       if len(self._yard[self._stack]) > 0:
         self._color = self._yard[self._stack][-1]
+        if self._color == 'i':
+          self._color = 't'
         self._yard[self._stack].pop(-1)
         success = True
       else:
@@ -501,7 +522,8 @@ class RobotArm:
     if self._aborted: return
     self._checkAccu()
     self._checkFlaws('scan')
-    return self._color
+    self._scans += 1
+    return self._getColorDes(self._color)
   
   def stackEmpty(self):
     return len(self._yard[self._stack]) == 0
@@ -526,8 +548,8 @@ class RobotArm:
       self._animate('idle')
       
   def constructYard(self, yard = 'r', symbols = '' ):
-    colorSymbols = string.ascii_lowercase + '?'
-    amountSymbols = string.ascii_uppercase + '*'
+    colorSymbols = string.ascii_lowercase + '?'  #string.ascii_uppercase + 
+    amountSymbols = '*#'
     stdColorSet = ''.join(self._colorSet)
      # determine symbols in the yard
     symbols = symbols.split(',')
@@ -582,8 +604,8 @@ class RobotArm:
                 color = _symbols[char]['colors'][_symbols[char]['value']]
             elif char in stdColorSet:
               color = char
-            if color not in stdColorSet:
-              color = self.colorSet[-1] # pick deault last of colors
+            else:
+              color = self._colorSet[-1] # pick deault last of colors
             if len(_stack) < self._maxLayers:
               _stack.append(color)
           amountBoxes = 1
@@ -591,7 +613,10 @@ class RobotArm:
           amountBoxes = int(char)
         elif char in amountSymbols and char in _symbols:
           if _symbols[char]['proces'] == '?':
-            amountBoxes = random.randint(0,_symbols[char]['value'])
+            if self._level == 3 and self._limitActions:
+              amountBoxes = _symbols[char]['value'] # test maximal!!
+            else:
+              amountBoxes = random.randint(0,_symbols[char]['value'])
           else:
             amountBoxes = _symbols[char]['value']
             if _symbols[char]['proces'] == '+':
@@ -628,15 +653,36 @@ class RobotArm:
       solution = self.serializeYard(_yardSolution)
     return solution
   
+  def setScanLimits(self,scans):
+    _scansMax = False
+    _scansMin = False
+    if type(scans) is str:
+      _limits = scans.split(":")
+      try:
+        _scansMin = int(_limits[0])
+      except:
+        print('error specs scans minimum')
+      try:
+        _scansMax = int(_limits[1])
+      except:
+        print('error specs scans maximum')        
+    return _scansMin, _scansMax
+  
   def _displayMission(self):
     
     if self._level == 0: return
     info1 = 'No restrictions on lines of code'
-    info2 = 'No restrictions on actions taken, but no errors allowed!'
+    info2 = 'No restrictions on actions taken, but no errors allowed.'
     if self._level in [1,2,3] and self._limitLines != False:
       info1 = f'Maximum number of lines of code: {self._limitLines}'
-    if self._level in [3] and self._limitActions != False:
-        info2 = f'Maximum number of actions: {self._limitActions}, no errors or warnings!'
+    if self._scansMin:
+      info2 += f' {self._scansMin} to {self._scansMax} scans needed.'
+    if self._level in [3]:
+      info2 = f'Maximum number of actions: {self._limitActions}' if self._limitActions != False else 'No restrictions on actions taken'
+      if self._scansMax:
+        info2 += f', maximal {self._scansMax} scans allowed'      
+      info2 += ', no errors nor warnings!'
+
     _missionText = 'WITH UNKNOWN SOLUTION' if self._solution == False else f'AT LEVEL: {self._level}'
     self._missionInfo(f'STARTED {_missionText} ', info1, info2,'yellow')
     self._log(f'Started with {self._lines} lines of code','i')
@@ -644,8 +690,10 @@ class RobotArm:
   def load(self, challenge = _defaultChallenge , level = 0):
     _symbols = ''
     _solution = False
-    _levels = False 
+    _levels = False
+    _scans = False
     _criteria = False
+    _info = ''
 
     if type(challenge) is dict:
       _yard = challenge.get('start','')
@@ -653,32 +701,41 @@ class RobotArm:
       _solution = challenge.get('solution',False)
       _criteria = challenge.get('criteria',False)
       _levels = challenge.get('levels',False)
-      _challengeName = challenge.get('name','no name')
+      _scans = challenge.get('scans',False)
+      _challengeName = challenge.get('name',f'no name')
+      _challengeName = _challengeName if _challengeName else 'no name'
+      _info = challenge.get('info','')
     elif type(challenge) is str:
       level = 0
       _yard = challenge
-      _challengeName = 'no name'
+      _challengeName = f'no name' 
     else:
       return False
 
+    if _levels != False:
+      while level > 1 and not str(level)+':' in _levels: level -= 1
+    self._level = level
+    
     self._yard = self.constructYard(_yard, _symbols)
     self._yardStart = self.serializeYard(self._yard)
     self._solution = self.setSolution(_solution)
     self._criteria = _criteria
     self._solutionDone = False
 
-    if _levels != False:
-      while level > 1 and not str(level)+':' in _levels: level -= 1
-    self._level = level
-   
     self._limitLines, self._limitActions = self.setLevelLimits(level, _levels)
+    self._scansMin, self._scansMax = self.setScanLimits(_scans)
     self._lines = self._count_lines_of_code()
     self._actions = 0
     self._challengeName =_challengeName
+
+    msg = self._colored(self._challengeName,'blue') + ('\n'+_info if _info else '')
+    self._log(msg,'i')
+
     self._mission = False
     self._knownEmpty = [True for stack in range(self._maxStacks)]
     self._accuCapacity = self._limitActions
     self._accuEmpty = False
+    self._scans = 0
     self._displayMission()
     self._animate('idle')
 
@@ -772,6 +829,10 @@ class RobotArm:
         fails.append('too many actions')
       if self._level > 2 and self._criticals['w'] > 0:
         fails.append('warnings given')
+      if self._scansMin and self._scans < self._scansMin:
+        fails.append(f'less than {self._scansMin} scans')
+      if self._level > 2 and self._scansMax and self._scans > self._scansMax:
+        fails.append(f'more than {self._scansMax} scans')        
       if fails:
         sup = ' AND ABORTED' if self._aborted else ''
         info1 = 'Mission not yet accomplished. Lets work on it!'
