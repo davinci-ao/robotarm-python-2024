@@ -1,4 +1,4 @@
-def hasDemocratie(yardStart, yardNow, criteria=''):
+def getDemocratieWinner(yardStart):
   char_count = {}
   _yard = yardStart.split(',')
   for index in range(len(_yard)):
@@ -17,16 +17,21 @@ def hasDemocratie(yardStart, yardNow, criteria=''):
           max_count = count
           winner = char
 
-  for indexStack in range(1,len(_yard)):
-    _stack = _yard[indexStack]
-    if len(_stack) > 0 and _stack[0] == winner:
-        _stack.pop(0)
-        _yard[0].append(winner)
+  return winner
 
-  solution = ''
-  for stack in _yard:
-    solution += ''.join(stack)+','
-  return yardNow == solution[:-1]
+def getDemocratieSolution(yardStart, criteria=''):
+  winner = getDemocratieWinner(yardStart)
+  _yard = yardStart.split(',')
+  for indexStack in range(1,len(_yard)):
+    if len(_yard[indexStack]) > 0 and _yard[indexStack] == winner:
+        _yard[indexStack] = ''
+        _yard[0] += winner
+
+  return ','.join(_yard)
+
+def hasDemocratie(yardStart, yardNow, criteria=''):
+  solution = getDemocratieSolution(yardStart, criteria)
+  return yardNow == solution
 
 def hasColorNotAt(yardStart, yardNow, spec):
   color = spec[0]
@@ -52,7 +57,7 @@ def hasColorCollectedAt(yardStart, yardNow, spec):
   _yardNow = yardNow.split(',')   
   if 0 <= indexNow < len(_yardNow) and _yardNow[indexNow].count(color) == totalCounted:
     return True
-     
+    
   return False
 
 def hasColorMoved(yardStart, yardNow, spec):
@@ -124,5 +129,77 @@ def hasSolution(yardStart, yardNow, criteria):
 
   return checked
 
-# result = hasSolution('','','0}1')
+def moveColor(solution, spec):
+  color = spec[0]
+  try:
+    shift = int(spec[2])
+  except: 
+     return False
+  if spec[1] == '<':
+     shift = -1 * shift
+
+  stacks = solution.split(',')
+  shifted = ['' for index in range(len(stacks))]
+  for index in range(len(stacks)):
+    newIndex = index + shift
+    if newIndex < 0 or newIndex >= len(stacks): continue
+    shifted[newIndex] += color * stacks[index].count(color)
+    stacks[index] = stacks[index].replace(color,'')
+  for index in range(len(stacks)):
+    stacks[index] += shifted[index]
+  return ','.join(stacks)
+
+
+def collectColorAt(solution, spec):
+  color = spec[0]
+  try:
+    indexNow = int(spec[2:])
+  except: 
+     return solution
+  stacks = solution.split(',')
+  for index in range(len(stacks)):
+    if index == indexNow: continue
+    stacks[indexNow] += color * stacks[index].count(color)
+    stacks[index] = stacks[index].replace(color,'')
+
+  return ','.join(stacks)
+
+def distributeFromAt(solution, spec):
+  try:
+    source = int(spec[0])
+    dest = int(spec[2])
+  except:
+     return False
+  if spec[1] == '}':
+    delta = 1
+  elif spec[1] == '{':
+    delta = -1
+
+  stacks = solution.split(',')
+  boxes = stacks[source]
+  stacks[source] = ''
+  for index in range(len(boxes)-1,-1,-1):
+    color = boxes[index]
+    if 0 <= dest < len(stacks):
+      stacks[dest] += color
+    dest += delta    
+  
+  return ','.join(stacks)
+
+def exampleSolution(yardStart, criteria):
+  solution = yardStart
+
+  if type(criteria) == str:
+    _specs = criteria.split(',')
+    for _spec in _specs:
+      if _spec[1] == ':':
+        solution = collectColorAt(solution, _spec)
+      elif _spec[1] in ['>','<']: 
+        solution = moveColor(solution, _spec)
+      elif _spec[1] in ['}','{']:
+        solution = distributeFromAt(solution, _spec)
+  return solution
+
+# solution = presentSolution('rgboywpt,,,,,,,,,','0}2')
+# print(solution)
 # print(result)

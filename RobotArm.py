@@ -94,8 +94,8 @@ class RobotArm:
     {"name": 'p', 'color': (128,0,128), 'des': 'purple'},
     {"name": 'o', 'color': (255,128,0), 'des': 'orange'},
     {"name": 'n', 'color': (10,10,10), 'des': 'black'},
-    {"name": 'i', 'color': _backgroundColor, 'des': 'invisible','pencolor':_backgroundColor}, # turns into tranaparent when grabbed
-    {"name": 't', 'color': _backgroundColor, 'des': 'transparent','pencolor':_transparentPenColor},
+    {"name": 'i', 'color': False, 'des': 'invisible','pencolor':False}, # turns into transparent when grabbed
+    {"name": 't', 'color': False, 'des': 'transparent','pencolor':_transparentPenColor},
     {"name": 'l', 'color': (160,160,160), 'des': 'gray'},
   ]
   _colorSet = [color['name'] for color in _colors]
@@ -268,8 +268,10 @@ class RobotArm:
       print('speed must be an integer between 0 and ' + str(len(self._speeds)-1))
 
   def _drawBoxAtPosition(self, x, y, color, pencolor):
-    pygame.draw.rect(self._screen, color, (x, y, self._boxWidth, self._boxHeight))
-    pygame.draw.rect(self._screen, pencolor, (x, y, self._boxWidth, self._boxHeight), self._penWidth)
+    if color:
+      pygame.draw.rect(self._screen, color, (x, y, self._boxWidth, self._boxHeight))
+    if pencolor:
+      pygame.draw.rect(self._screen, pencolor, (x, y, self._boxWidth, self._boxHeight), self._penWidth)
 
   def _boxSpaceWidth(self):
     return (self._boxWidth + 2 * self._boxMargin) + self._penWidth
@@ -288,6 +290,10 @@ class RobotArm:
     y = self._layerY(layer)
     _color,_pencolor = self._getColorCode(self._yard[stack][layer])
     self._drawBoxAtPosition(x,y,_color, _pencolor)
+
+  def drawSpot(self, stack, color):
+    x = self._stackX(stack) - self._boxMargin - self._penWidth
+
 
   def _drawStack(self, stack):
     for l in range(len(self._yard[stack])):
@@ -693,6 +699,7 @@ class RobotArm:
     _levels = False
     _scans = False
     _criteria = False
+    _example = False
     _info = ''
 
     if type(challenge) is dict:
@@ -700,6 +707,7 @@ class RobotArm:
       _symbols = challenge.get('symbols','')
       _solution = challenge.get('solution',False)
       _criteria = challenge.get('criteria',False)
+      _example = challenge.get('example',False)
       _levels = challenge.get('levels',False)
       _scans = challenge.get('scans',False)
       _challengeName = challenge.get('name',f'no name')
@@ -720,6 +728,7 @@ class RobotArm:
     self._yardStart = self.serializeYard(self._yard)
     self._solution = self.setSolution(_solution)
     self._criteria = _criteria
+    self._example = _example
     self._solutionDone = False
 
     self._limitLines, self._limitActions = self.setLevelLimits(level, _levels)
@@ -863,10 +872,17 @@ class RobotArm:
 
   def showSolution(self):
     if type(self._solution) == str:
-      self._yard = self._reconstructYard(self._solution)
-      self._animate('idle')
-      print(self._colored('Solution example displayed','yellow'))
-      self._aborted = True
+      _solution = self._solution
+    elif callable(self._example):
+      _yard = self.serializeYard(self._yard)
+      _solution = self._example(_yard,self._criteria)
+    else: return
+
+
+    self._yard = self._reconstructYard(_solution)
+    self._animate('idle')
+    print(self._colored('Solution example displayed','yellow'))
+    self._aborted = True
 
 
 if __name__ == "__main__":
