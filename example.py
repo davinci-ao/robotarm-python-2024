@@ -1,12 +1,22 @@
 from RobotArm import RobotArm
-from robotArmChallenges import challenges
+from robotArmChallenges import challenges_basic, challenges_beginner, challenges_intermediate, challenges_advanced
+from time import sleep
+r = RobotArm(challenges_advanced[5],1)
 
-robotArm = RobotArm(challenges[7],0)
-robotArm.showSolution()
+r.wait()
+# robotArm.showSolution()
+# r.moveRight()
+# r.grab()
+# r.moveLeft()
+# r.drop()
 
+r.showSolution()
 
-# # robotArm._showSolution()
-# # robotArm.moveLeft()   
+r.moveRight()
+
+# # Na jouw code wachten tot het sluiten van de window:
+
+r.report()
 
 # robotArm.moveRight()
 # for i in range(7):
@@ -16,8 +26,5 @@ robotArm.showSolution()
 #     robotArm.drop()
 #     if i < 6:
 #         for move in range(8):
-#             robotArm.moveLeft()    
-
-# # Na jouw code wachten tot het sluiten van de window:
-
-robotArm.wait()
+#             robotArm.moveLeft()
+# robotArm.moveLeft()

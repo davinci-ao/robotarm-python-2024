@@ -786,6 +786,7 @@ class RobotArm:
     return True
 
   def _wait(self, handler = False):
+    print(f'Press spacebar to continue...')
     cycle = 0
     while True:
       events = pygame.event.get()               # get latest events
@@ -793,6 +794,8 @@ class RobotArm:
         if not handler(events):
           break
       self._defaultHandler(events)
+      if not self._continue(events):
+        return
       if len(events) > 0:                       # events happened?
         cycle = 0                               # stay awake and alert
       cycle += 1                                # prepare for sleep
@@ -855,8 +858,11 @@ class RobotArm:
           info2 = 'Try a higher level!'
         self._missionInfo(f'ACCOMPLISHED', info1, info2,'green')    
       
-  def wait(self):
+  def report(self):
     self._reportMission()
+    self._wait()
+  
+  def wait(self):
     self._wait()
 
   @staticmethod
@@ -878,11 +884,11 @@ class RobotArm:
       _solution = self._example(_yard,self._criteria)
     else: return
 
-
     self._yard = self._reconstructYard(_solution)
     self._animate('idle')
     print(self._colored('Solution example displayed','yellow'))
     self._aborted = True
+    self._wait()
 
 
 if __name__ == "__main__":
