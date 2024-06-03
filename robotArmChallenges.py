@@ -1,5 +1,8 @@
 from robotArmSolutions import *
 
+challenge_example = {'start': 'r', 'solution': ',r', 'name': 'move box', 'levels':'2:8,3:7/3', 
+         'info':'move box to spot 1'}
+
 challenges_basic =  {
     1 : {'start': ',,l', 'solution': 'l', 'name': 'box to start', 'levels':'2:10,3:10/6', 
          'info':'move box to spot 0'},

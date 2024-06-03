@@ -9,16 +9,13 @@ from math import ceil, floor
 
 # RobotArm class ################################################
 help = '''
-  An object of this class...
-
-  lets you load and display a yard with stacks of colored boxes
-  you can load a predefined challenge at the creation
-  lets you program the movement of boxes and scan their colors
-  lets you inspect the yard for debugging purposes
-
-  supported colors are: white, green, red, blue, yellow, orange, purple and nocolor
-
-  methods to use: 
+  =================== RobotArm ===================
+  moves boxes from one spot to another...
+  
+  robotArm = RobotArm(challenge,level)
+    loads a challenge and displays its stacks of colored boxes
+  
+  methods to use with robotArm:
 
   moveRight()
     moves the robotarm one stack position to the right
@@ -43,16 +40,22 @@ help = '''
     returns True if stack under robotarm ie empty, else False
 
   showSolution()
-    displays the solution if available
+    displays the the solution (if available)
 
-  wait(operator)
-      waits for the the program window to be closed
-      operator is an optional function with a parameter: events {list of events}
-      the operator must/can handle each event in events
+  report()
+    reports the results of the mission (challenge) and then waits
+  
+  wait()
+    waits for the the program window to continue 
 
   operate()
-      makes the robotarm operate on keyboard-keys: LEFT, RIGHT and DOWN
+    makes the robotarm operate on keyboard-keys: LEFT, RIGHT and DOWN
 
+  supported colors are: 
+    w(hite), g(reen), r(ed), b(lue), y(ellow), o(range), p(urple), n(o color), t(ransparent) and i(nvisible)
+'''
+
+helpChallenge = '''
 creating and loading challenges
 
   load(challenge)

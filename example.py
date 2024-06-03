@@ -1,30 +1,17 @@
 from RobotArm import RobotArm
-from robotArmChallenges import challenges_basic, challenges_beginner, challenges_intermediate, challenges_advanced
-from time import sleep
-r = RobotArm(challenges_advanced[5],1)
+from robotArmChallenges import challenge_example
 
-r.wait()
-# robotArm.showSolution()
-# r.moveRight()
-# r.grab()
-# r.moveLeft()
-# r.drop()
+# load the robotarm with a challenge on a level (max 3)
+robotArm = RobotArm(challenge_example,0)
 
-r.showSolution()
+# here comes the code to move one box one position
+robotArm.grab()
+robotArm.moveRight()
+robotArm.drop()
+robotArm.moveLeft()
 
-r.moveRight()
+# report the results of the mission
+robotArm.report()
 
-# # Na jouw code wachten tot het sluiten van de window:
-
-r.report()
-
-# robotArm.moveRight()
-# for i in range(7):
-#     robotArm.grab()
-#     for move in range(8):
-#         robotArm.moveRight()
-#     robotArm.drop()
-#     if i < 6:
-#         for move in range(8):
-#             robotArm.moveLeft()
-# robotArm.moveLeft()
+# want help? Unlock code below!
+# robotArm.help()
