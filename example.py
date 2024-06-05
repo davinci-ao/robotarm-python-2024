@@ -15,3 +15,8 @@ robotArm.report()
 
 # want help? Unlock code below!
 # robotArm.help()
+
+# want to inspect a solution? Unlock code below!
+# robotArm.showSolution()
+# robotArm.wait()
+
