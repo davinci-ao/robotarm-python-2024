@@ -5,267 +5,85 @@ Lees de instructies op de wiki pagina hoe de robotarm bibliotheek werkt. Vervolg
 ## Oefening 1
 ```python
 from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 1')
+from robotArmChallenges import challenges_basic
+robotArm = RobotArm(challenges_basic[1],0)
 
 # Jouw python instructies zet je vanaf hier:
 
 
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
+# Na jouw code kijken naar het resultaat:
+robotArm.report()
 ```
-Verplaats het rode blok één plek naar links.
+Verplaats het grijze blok twee plekken naar links. Voorbeelden vóór en ná:
 
-![Oefening 1](readme/exercise1.png)
+![Oefening 1 start](readme/1-start.png)
+![Oefening 1 solution](readme/1-solution.png)
 
 ## Oefening 2
 ```python
 from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 2')
+from robotArmChallenges import challenges_basic
+robotArm = RobotArm(challenges_basic[2],0)
 
 # Jouw python instructies zet je vanaf hier:
 
 
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
+# Na jouw code kijken naar het resultaat:
+robotArm.report()
 ```
-Stapel alle blokken op aan de rechterkant.
+Verwissel de blokken. Voorbeelden vóór en ná:
 
-![Oefening 2](readme/exercise2.png)
+![Oefening 1 start](readme/2-start.png)
+![Oefening 1 solution](readme/2-solution.png)
 
 ## Oefening 3
 ```python
 from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 3')
+from robotArmChallenges import challenges_basic
+robotArm = RobotArm(challenges_basic[3],0)
 
 # Jouw python instructies zet je vanaf hier:
 
 
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
+# Na jouw code kijken naar het resultaat:
+robotArm.report()
 ```
-Verplaats de hele stapel blokken één plek naar rechts.
+Verwissel de blokken. Voorbeelden vóór en ná:
 
-![Oefening 3](readme/exercise3.png)
+![Oefening 1 start](readme/3-start.png)
+![Oefening 1 solution](readme/3-solution.png)
 
 ## Oefening 4
 ```python
 from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 4')
+from robotArmChallenges import challenges_basic
+robotArm = RobotArm(challenges_basic[4],0)
 
 # Jouw python instructies zet je vanaf hier:
 
 
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
+# Na jouw code kijken naar het resultaat:
+robotArm.report()
 ```
-Verplaats de hele stapel blokken één plek naar rechts. Zorg ervoor dat de volgorde van de blokken gelijk blijft.
+Verplaats alle blokken naar het einde. Voorbeelden vóór en ná:
 
-![Oefening 4](readme/exercise4.png)
+![Oefening 1 start](readme/4-start.png)
+![Oefening 1 solution](readme/4-solution.png)
 
 ## Oefening 5
 ```python
 from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 5')
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Verplaats alle blokken één plek naar rechts. Zorg ervoor dat de volgorde van de blokken gelijk blijft. 
-
-![Oefening 5](readme/exercise5.png)
-
-## Oefening 6
-```python
-from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 6')
+from robotArmChallenges import challenges_basic
+robotArm = RobotArm(challenges_basic[5],0)
 
 # Jouw python instructies zet je vanaf hier:
 
 
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
+# Na jouw code kijken naar het resultaat:
+robotArm.report()
 ```
-Verdeel de rode en witte blokken over 2 stapels: een rode stapel en een witte stapel. 
+Als het blok geel is verplaats hem naar rechts. Als het blok rood is verplaats hem naar links. Voorbeelden vóór en ná:
 
-![Oefening 6](readme/exercise6.png)
+![Oefening 1 start](readme/5-start.png)
+![Oefening 1 solution](readme/5-solution.png)
 
-## Oefening 7
-```python
-from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 7')
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Verplaats iedere stapel één plek naar links.
-
-Je mag maximaal 12 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
-
-![Oefening 7](readme/exercise7.png)
-
-## Oefening 8
-```python
-from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 8')
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Verplaats de stapel naar de rechterkant.
-
-Je mag maximaal 13 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
-
-![Oefening 8](readme/exercise8.png)
-
-## Oefening 9
-```python
-from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 9')
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Verplaats alle stapels vijf stappen naar rechts.
-
-Je mag maximaal 13 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
-
-![Oefening 9](readme/exercise9.png)
-
-## Oefening 10
-```python
-from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 10')
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Draai de volgorde van de blokken om.
-
-Je mag maximaal 15 regels code gebruiken inclusief de import, het laden van de robotarm en de wait
-
-![Oefening 10](readme/exercise10.png)
-
-## Oefening 11
-```python
-from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 11')
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Verplaats alle witte blokken één plek naar rechts. 
-
-Let op, de blokken zijn iedere keer anders als je het programma start!
-
-![Oefening 11](readme/exercise11.png)
-
-## Oefening 12
-```python
-from RobotArm import RobotArm
-
-robotArm = RobotArm('exercise 12')
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Verplaats alle rode blokken naar het einde.
-
-Let op, de blokken zijn iedere keer anders als je het programma start!
-
-![Oefening 12](readme/exercise12.png)
-
-## Oefening 13
-```python
-from RobotArm import RobotArm
-# Let op: hier start het anders voor een random level:
-robotArm = RobotArm()
-robotArm.randomLevel(1,7)
-
-# Jouw python instructies zet je vanaf hier:
-
-
-# Na jouw code wachten tot het sluiten van de window:
-robotArm.wait()
-```
-Verdeel alle blokken over de lege plaatsen, zodra er geen blokken meer zijn moet de arm stoppen.
-![Oefening 12](readme/exercise13-start.png)
-
-resultaat na verdeling ziet er zo uit:
-
-![Oefening 12](readme/exercise13-end.png)
-
-## Bonusopdrachten
-### Spreiding
-Verspreid de blokken van de stapel. Gebruik level: exercise 3.
-![Spreiding](readme/spreiding-1.png)
-
-naar:
-
-![Spreiding](readme/spreiding-2.png)
-
-### Soorten
-Verzamel de kleuren in stapels. Gebruiken level: soorten
-![Soorten](readme/soorten-1.png)
-
-naar:
-
-![Soorten](readme/soorten-2.png)
-
-### Democratie
-Tel alle kleuren. Maak een stapel van de meestgetelde kleur. Gebruik level: democratie
-![Democratie](readme/democratie-1.png)
-
-meest getelde kleur naar één stapel:
-
-![Democratie](readme/democratie-2.png)
-
-Zijn er meerdere kleuren het meest geteld, kies dan zelf welke kleur je opstapelt:
-
-![Democratie](readme/democratie-3.png)
-
-naar:
-
-![Democratie](readme/democratie-4.png)
-
-Veel puzzelplezier en succes!
-
-### Kantelen
-Kantel de kleuren in de stapels. Gebruik level: exercise 9.
-
-![Kantelen](readme/kantelen-1.png)
-
-naar:
-
-![Kantelen](readme/kantelen-2.png)
