@@ -43,42 +43,61 @@ help = '''
     displays the the solution (if available)
 
   report()
-    reports the results of the mission (challenge) and then waits
+    reports the results of the mission (challenge and level) and then waits
   
   wait()
-    waits for the the program window to continue 
+    waits for the program window to continue 
 
   operate()
     makes the robotarm operate on keyboard-keys: LEFT, RIGHT and DOWN
 
-  supported colors are: 
-    w(hite), g(reen), r(ed), b(lue), y(ellow), o(range), p(urple), n(o color), t(ransparent) and i(nvisible)
+  help()
+    shows help in the terminal
+  
+  helpChallenge()
+    shows help in the terminal in creating challenges
 '''
 
 helpChallenge = '''
-creating and loading challenges
+=================== define challenges ===================
 
-  load(challenge)
-    loads a challenge for example: {'name': 'collect boxes', 'yard' : 'b,,,,b,,,b' , 'solution': ',,,,,,,,,bbb', 'levels':'2:20,3:20/29' }
-    loads a yard without challenge for example: '3r,2r,b,b'
-    returns True if succeeded, returns False if failed
+  challenge example: 
+  {'name': 'collect boxes', 
+   'start' : 'gbg,,y,,br,,,,' , # defining the colors of boxes at spots separated by komma
+   'solution': ',,,,,,,,,gbgybr', # defining the colors of boxes at spots separated by komma
+   'levels':'2:20,3:20/29', # defining for levels: maximum code lines / maximum actions taken
+   'info': 'move all boxes to last spot' # detailed instructions to reach solution
+  }
+    
+    'start' defines the colors of boxes at spots separated by komma
+    'solution' defines the colors of boxes at spots separated by komma
+    'levels' defines for levels the levelnr: maximum code lines / maximum actions taken
+    'info' detailed instructions to reach solution
 
-    defining yards and stacks
+    supported colors: 
+    w=white, g=green, r=red, b=blue, y=yellow, o=orange, p=purple, l=grey, n=black, t=transparent and i=invisible
 
-    Yards are defined in a string with stacks separated by komma's
-    boxes in a stacks are defined by a lowercase letter defining its color. 
-    colors: b is blue; r is red; w is white, g is green, y is yellow, o is orange, p is purple, n is no-color, ? is a random color from w, r , g or b
+    examples of start stacks and fixed solution stacks:
 
-    for example:
-    ',r,bb,ggg' defines a yard with an empty stack, a stack with one red box, a stack with two blue boxes and a stack with three green boxes
+      3y2r  -> 3 yellow boxes, 2 red boxes
+      *b    -> random number (0..5) of blue boxes
+      4?    -> 4 boxes of a random color from: red, green, blue or white
+      *p combined with 'symbols' : '*?2' -> random number (0..2) of purple boxes
+      x combined with 'symbols' : 'x?yyyybb' -> 1 box with a color random picked from collection yyyybb
+      4x combined with 'symbols' : 'x-rrrrggg' -> 4 boxes with a color once random picked from collection rrrrggg
+      #w#r#b combined with 'symbols' : '#+1' -> 1 white, 2 red, 3 blue boxes
+      #w,#r,#b combined with 'symbols' : '#-5' -> in subsequent stacks: 5 white, 4 red, 3 blue boxes
 
-    digits before a color define the number of boxes of that color. * means a random number of boxes from 0, 1, 2, 3 or 4
-    for example:
-    '3r,,3w,,3b' defines a yard with a stack with 3 red boxes, en empty stack, a stack with 3 white boxes, an empty stack an a stack with 3 blue boxes
+    solutions based on a start with random colors and numbers can be defined by a function called with criteria:
+    'criteria' : 'r:6' -> all red boxes to be collected at spot 6
+    'criteria' : 'b>2' -> all blue boxes to be moved 2 positions to the right
+    'criteria' : 'w<1' -> all white boxes to be moved 1 position to the left
+    'criteria' : '2}4' -> all boxes on spot to be distributed to the right starting at spot 4
+    'criteria' : '3{8' -> all boxes on spot to be distributed to the left starting at spot 8
 '''
 
 class RobotArm:
-  version = '2.4'
+  version = '2.5'
 # 2.1: incluses warnings for actions like hitting the borders
 # 2.2: includes flaw terminal warnings for pointless actions
 # 2.3: may grab once without warning from empty stack that was randomly sized
@@ -871,6 +890,9 @@ class RobotArm:
   @staticmethod
   def help():
     print(help)
+  
+  def helpChallenge():
+    print(helpChallenge)
 
   def _reconstructYard(self,yard):
     _yard = []
