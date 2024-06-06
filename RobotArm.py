@@ -39,6 +39,9 @@ help = '''
   stackEmpty()
     returns True if stack under robotarm ie empty, else False
 
+  stackIndex() 
+    returns the current index (position) of the robotArm
+
   showSolution()
     displays the the solution (if available)
 
@@ -555,6 +558,9 @@ class RobotArm:
   
   def stackEmpty(self):
     return len(self._yard[self._stack]) == 0
+  
+  def stackIndex(self):
+    return self._stack
 
 ########### LEVEL & YARD lOADING & CREATION ###########
 
@@ -585,6 +591,12 @@ class RobotArm:
     _symbols['?'] = {'colors' : list('rgbw'), 'proces': '?'} # default random color symbol
     _symbols['*'] = {'value' : 4, 'proces': '?'} # default random amount symbol
     for symbol in symbols:
+      if symbol[0] == '-':
+        try:
+          self._stack = int(symbol[1])
+        except:
+          continue
+
       if len(symbol) < 3: continue
 
       if symbol[0] in amountSymbols and symbol[2] in string.digits:
