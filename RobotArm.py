@@ -80,7 +80,7 @@ helpChallenge = '''
     supported colors: 
     w=white, g=green, r=red, b=blue, y=yellow, o=orange, p=purple, l=grey, n=black, t=transparent and i=invisible
 
-    examples of start stacks and fixed solution stacks:
+    examples of start stacks and solution stacks:
 
       3y2r  -> 3 yellow boxes, 2 red boxes
       *b    -> random number (0..5) of blue boxes
@@ -91,7 +91,7 @@ helpChallenge = '''
       #w#r#b combined with 'symbols' : '#+1' -> 1 white, 2 red, 3 blue boxes
       #w,#r,#b combined with 'symbols' : '#-5' -> in subsequent stacks: 5 white, 4 red, 3 blue boxes
 
-    solutions based on a start with random colors and numbers can be defined by a function called with criteria:
+    solutions based on a start with random colors or numbers can be defined by a function called with criteria:
     'criteria' : 'r:6' -> all red boxes to be collected at spot 6
     'criteria' : 'b>2' -> all blue boxes to be moved 2 positions to the right
     'criteria' : 'w<1' -> all white boxes to be moved 1 position to the left
@@ -591,7 +591,7 @@ class RobotArm:
     _symbols['?'] = {'colors' : list('rgbw'), 'proces': '?'} # default random color symbol
     _symbols['*'] = {'value' : 4, 'proces': '?'} # default random amount symbol
     for symbol in symbols:
-      if symbol[0] == '-':
+      if len(symbol) > 1 and symbol[0] == '-':
         try:
           self._stack = int(symbol[1])
         except:
@@ -900,10 +900,10 @@ class RobotArm:
     self._wait()
 
   @staticmethod
-  def help():
+  def help(self):
     print(help)
   
-  def helpChallenge():
+  def helpChallenge(self):
     print(helpChallenge)
 
   def _reconstructYard(self,yard):
