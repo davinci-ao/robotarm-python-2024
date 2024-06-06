@@ -1,6 +1,6 @@
 # Robotarm
 
-Lees de instructies op de wiki pagina hoe de robotarm bibliotheek werkt. Vervolgens probeer je de onderstaande 5 basisoefeningen te maken. Bestudeer de mogelijkheden in example.py Start met robotarm-1.py voorr jouw eerste  oefening. Na deze oefeningen zijn er vervolg-challenges te vinden in robotArmChallenges.py
+Lees de instructies op de wiki pagina hoe de robotarm bibliotheek werkt. Vervolgens probeer je de onderstaande 5 basisoefeningen te maken. Bestudeer de mogelijkheden in **example.py**. Voor jouw eerste oefening start je Start met **robotarm-1.py**. Na deze 5 oefeningen zijn er vervolg-challenges te vinden in **robotArmChallenges.py**
 
 ## Oefening 1
 ```python
