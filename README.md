@@ -84,6 +84,12 @@ robotArm.report()
 ```
 Als het blok geel is verplaats hem naar rechts. Als het blok rood is verplaats hem naar links. Voorbeelden vóór en ná:
 
+Als het blok geel is ...
+
 ![Oefening 1 start](readme/5-start.png)
 ![Oefening 1 solution](readme/5-solution.png)
 
+Als het blok rood is...
+
+![Oefening 1 start](readme/5-start-2.png)
+![Oefening 1 solution](readme/5-solution-2.png)
